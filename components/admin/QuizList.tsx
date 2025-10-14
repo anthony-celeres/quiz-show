@@ -8,9 +8,10 @@ interface QuizListProps {
   onEdit: (quiz: Quiz) => void;
   onViewAttempts: (quiz: Quiz) => void;
   refresh: boolean;
+  onStatusChange?: () => void;
 }
 
-export const QuizList = ({ onEdit, onViewAttempts, refresh }: QuizListProps) => {
+export const QuizList = ({ onEdit, onViewAttempts, refresh, onStatusChange }: QuizListProps) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,15 +42,24 @@ export const QuizList = ({ onEdit, onViewAttempts, refresh }: QuizListProps) => 
 
   const toggleQuizStatus = async (quiz: Quiz) => {
     if (!supabase) return;
-    
+    const nextStatus = !quiz.is_active;
+    const updates: Record<string, unknown> = {
+      is_active: nextStatus,
+    };
+
+    if (nextStatus) {
+      updates.activation_cycle = (quiz.activation_cycle ?? 0) + 1;
+    }
+
     try {
       const { error } = await supabase
         .from('quizzes')
-        .update({ is_active: !quiz.is_active })
+        .update(updates)
         .eq('id', quiz.id);
 
       if (error) throw error;
       fetchQuizzes();
+      onStatusChange?.();
     } catch (error) {
       console.error('Error updating quiz status:', error);
     }
@@ -161,7 +171,7 @@ export const QuizList = ({ onEdit, onViewAttempts, refresh }: QuizListProps) => 
                 
                 <Button
                   size="sm"
-                  variant={quiz.is_active ? 'outline' : 'default'}
+                  variant={quiz.is_active ? 'warning' : 'success'}
                   onClick={() => toggleQuizStatus(quiz)}
                   className="w-full"
                 >

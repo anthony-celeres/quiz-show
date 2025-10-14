@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut, supabase } from '@/lib/supabase';
 import { QuizForm } from '@/components/admin/QuizForm';
@@ -28,7 +28,9 @@ type View = 'quizzes' | 'create' | 'attempt' | 'results' | 'leaderboard' | 'hist
 export default function Home() {
   const { user, loading, isAdmin, isStudent } = useAuth();
   const router = useRouter();
-  const [view, setView] = useState<View>('quizzes');
+  const searchParams = useSearchParams();
+  const urlView = (searchParams.get('view') as View) || 'quizzes';
+  const quizIdParam = searchParams.get('quiz');
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [lastAttempt, setLastAttempt] = useState<QuizAttemptType | null>(null);
   const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
@@ -77,9 +79,18 @@ export default function Home() {
     fetchUserAttempts();
   }, [isStudent, user?.id, refreshQuizzes, fetchUserAttempts]);
 
+  const setViewAndQuiz = (view: View, quizId?: string | number) => {
+    const params = new URLSearchParams();
+    params.set('view', view);
+    if (quizId !== undefined && quizId !== null) params.set('quiz', String(quizId));
+    router.push(`/?${params.toString()}`);
+  };
+
+
   const handleSignOut = async () => {
     await signOut();
-    setView('quizzes');
+    // Ensure user lands on the quizzes view after sign-out
+    router.replace('/?view=quizzes');
   };
 
   const handleQuizComplete = async () => {
@@ -91,7 +102,10 @@ export default function Home() {
         .from('quiz_attempts')
         .select(`
           *,
-          quiz:quizzes (*)
+          quiz:quizzes (
+            *,
+            questions (*)
+          )
         `)
         .eq('user_id', user.id)
         .eq('quiz_id', selectedQuiz.id)
@@ -100,10 +114,53 @@ export default function Home() {
         .single();
 
       if (error) throw error;
+      if (data?.quiz?.questions) {
+        data.quiz.questions = [...data.quiz.questions].sort((a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
       setLastAttempt(data);
-      setView('results');
+      // navigate to results view for the current quiz
+      router.replace(`/?view=results&quiz=${selectedQuiz.id}`);
     } catch (error) {
       console.error('Error fetching attempt:', error);
+    }
+  };
+
+  const handleViewAttemptResults = async (attemptId: string) => {
+    if (!supabase) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('quiz_attempts')
+        .select(
+          `*,
+           quiz:quizzes (
+             *,
+             questions (*)
+           )`
+        )
+        .eq('id', attemptId)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.quiz?.questions) {
+        data.quiz.questions = [...data.quiz.questions].sort((a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
+
+      setSelectedQuiz(data?.quiz ?? null);
+      setLastAttempt(data);
+      if (data?.quiz_id) {
+        setViewAndQuiz('results', data.quiz_id);
+      } else {
+        setViewAndQuiz('results');
+      }
+    } catch (error) {
+      console.error('Error loading attempt results:', error);
+      alert('Unable to load detailed results.');
     }
   };
 
@@ -112,6 +169,7 @@ export default function Home() {
       router.replace('/login');
     }
   }, [loading, user, router]);
+ 
 
   if (loading) {
     return (
@@ -143,14 +201,15 @@ export default function Home() {
     );
   }
 
+
   const renderNavigation = () => (
-    <nav className="glass sticky top-0 z-50 border-b border-white/20">
+    <nav className="glass sticky top-0 z-50 border-b border-border/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-[#0056B3] text-white flex items-center justify-center shadow-sm">
+                <BookOpen className="w-6 h-6" />
               </div>
               <h1 className="text-2xl font-bold gradient-text">QuizMaster</h1>
             </div>
@@ -159,19 +218,19 @@ export default function Home() {
               {isAdmin ? (
                 <>
                   <Button
-                    variant={view === 'quizzes' ? 'default' : 'ghost'}
+                    variant={urlView === 'quizzes' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setView('quizzes')}
+                    onClick={() => setViewAndQuiz('quizzes')}
                   >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Manage Quizzes
                   </Button>
                   <Button
-                    variant={view === 'create' ? 'default' : 'ghost'}
+                    variant={urlView === 'create' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => {
                       setSelectedQuiz(null);
-                      setView('create');
+                      setViewAndQuiz('create');
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -181,17 +240,17 @@ export default function Home() {
               ) : (
                 <>
                   <Button
-                    variant={view === 'quizzes' ? 'default' : 'ghost'}
+                    variant={urlView === 'quizzes' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setView('quizzes')}
+                    onClick={() => setViewAndQuiz('quizzes')}
                   >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Quizzes
                   </Button>
                   <Button
-                    variant={view === 'history' ? 'default' : 'ghost'}
+                    variant={urlView === 'history' ? 'default' : 'ghost'}
                     size="sm"
-                    onClick={() => setView('history')}
+                    onClick={() => setViewAndQuiz('history')}
                   >
                     <History className="w-4 h-4 mr-2" />
                     History
@@ -200,9 +259,9 @@ export default function Home() {
               )}
               
               <Button
-                variant={view === 'leaderboard' ? 'default' : 'ghost'}
+                variant={urlView === 'leaderboard' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setView('leaderboard')}
+                onClick={() => setViewAndQuiz('leaderboard')}
               >
                 <Trophy className="w-4 h-4 mr-2" />
                 Leaderboard
@@ -211,15 +270,15 @@ export default function Home() {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-white/50 rounded-full">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-white border border-border/60 rounded-full shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-[#0056B3] text-white flex items-center justify-center">
+                <span className="text-sm font-semibold">
                   {user.email?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{user.email}</p>
-                <p className="text-xs text-gray-500">{isAdmin ? 'Administrator' : 'Student'}</p>
+                <p className="text-sm font-medium text-foreground">{user.email}</p>
+                <p className="text-xs text-muted-foreground">{isAdmin ? 'Administrator' : 'Student'}</p>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
@@ -233,15 +292,15 @@ export default function Home() {
   );
 
   const renderContent = () => {
-    switch (view) {
+    switch (urlView) {
       case 'create':
         return (
           <QuizForm
             onSuccess={() => {
-              setView('quizzes');
-              setRefreshQuizzes(!refreshQuizzes);
+                      setViewAndQuiz('quizzes');
+                      setRefreshQuizzes(!refreshQuizzes);
             }}
-            onCancel={() => setView('quizzes')}
+            onCancel={() => setViewAndQuiz('quizzes')}
             quizToEdit={selectedQuiz || undefined}
           />
         );
@@ -251,7 +310,7 @@ export default function Home() {
           <QuizAttempt
             quiz={selectedQuiz}
             onComplete={handleQuizComplete}
-            onCancel={() => setView('quizzes')}
+            onCancel={() => setViewAndQuiz('quizzes')}
           />
         ) : null;
 
@@ -260,7 +319,7 @@ export default function Home() {
           <QuizResults
             attempt={lastAttempt}
             onClose={() => {
-              setView('quizzes');
+              setViewAndQuiz('quizzes');
               setLastAttempt(null);
               setSelectedQuiz(null);
               setRefreshQuizzes(!refreshQuizzes);
@@ -272,29 +331,30 @@ export default function Home() {
         return <Leaderboard />;
 
       case 'history':
-        return <QuizHistory />;
+  return <QuizHistory onViewResults={handleViewAttemptResults} />;
 
       case 'attempts':
         return selectedQuiz ? (
           <QuizAttemptsList 
             quiz={selectedQuiz} 
-            onBack={() => setView('quizzes')} 
+            onBack={() => setViewAndQuiz('quizzes')} 
           />
         ) : null;
 
       case 'quizzes':
-        if (isAdmin) {
+            if (isAdmin) {
           return (
             <QuizList
               onEdit={(quiz) => {
                 setSelectedQuiz(quiz);
-                setView('create');
+                setViewAndQuiz('create', quiz.id);
               }}
               onViewAttempts={(quiz) => {
                 setSelectedQuiz(quiz);
-                setView('attempts');
+                setViewAndQuiz('attempts', quiz.id);
               }}
               refresh={refreshQuizzes}
+              onStatusChange={() => setRefreshQuizzes((prev) => !prev)}
             />
           );
         } else {
@@ -302,42 +362,49 @@ export default function Home() {
             <div className="space-y-8 fade-in">
               <div className="text-center">
                 <h2 className="text-4xl font-bold gradient-text mb-4">Available Quizzes</h2>
-                <p className="text-gray-600 text-lg">Choose a quiz to test your knowledge</p>
+                <p className="text-muted-foreground text-lg">Choose a quiz to test your knowledge</p>
               </div>
               
               {availableQuizzes.length === 0 ? (
                 <div className="text-center py-16">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                    <BookOpen className="w-12 h-12 text-gray-400" />
+                    <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+                      <BookOpen className="w-12 h-12 text-muted-foreground/60" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No Quizzes Available</h3>
-                  <p className="text-gray-500">Check back later for new quizzes!</p>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">No Quizzes Available</h3>
+                    <p className="text-muted-foreground">Check back later for new quizzes!</p>
                 </div>
               ) : (
                 <div className="responsive-grid">
                   {availableQuizzes.map((quiz, index) => {
-                    const hasAttempted = userAttempts.some(attempt => attempt.quiz_id === quiz.id);
+                    const currentCycle = quiz.activation_cycle ?? 0;
+                    const hasAttempted = userAttempts.some(
+                      (attempt) => attempt.quiz_id === quiz.id && (attempt.activation_cycle ?? 0) === currentCycle
+                    );
                     const isDisabled = !quiz.is_active || hasAttempted;
                     
                     return (
                       <div 
                         key={quiz.id} 
                         className={`modern-card p-8 group transition-all duration-300 ${
-                          isDisabled ? 'opacity-75' : 'hover:scale-105'
+                          isDisabled ? 'opacity-75' : 'hover:-translate-y-1'
                         }`}
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
                         <div className="flex items-start justify-between mb-6">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
-                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                isDisabled ? 'bg-gray-400' : 'bg-gradient-to-br from-blue-500 to-purple-600'
-                              }`}>
-                                <BookOpen className="w-6 h-6 text-white" />
+                              <div
+                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                  isDisabled
+                                    ? 'bg-muted text-muted-foreground'
+                                    : 'bg-[#0056B3] text-white shadow-sm'
+                                }`}
+                              >
+                                <BookOpen className="w-6 h-6" />
                               </div>
                               <div>
                                 <h3 className={`text-xl font-bold transition-colors ${
-                                  isDisabled ? 'text-gray-600' : 'text-gray-900 group-hover:text-blue-600'
+                                  isDisabled ? 'text-muted-foreground' : 'text-foreground group-hover:text-[#0056B3]'
                                 }`}>
                                   {quiz.title}
                                 </h3>
@@ -349,15 +416,15 @@ export default function Home() {
                               </div>
                             </div>
                             
-                            <p className="text-gray-600 mb-6 leading-relaxed">{quiz.description}</p>
+                            <p className="text-muted-foreground mb-6 leading-relaxed">{quiz.description}</p>
                             
                             <div className="grid grid-cols-2 gap-4 mb-6">
-                              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-                                <Clock className="w-4 h-4 text-blue-500" />
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg">
+                                <Clock className="w-4 h-4 text-[#0056B3]" />
                                 <span className="font-medium">{quiz.duration_minutes} min</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-                                <Trophy className="w-4 h-4 text-yellow-500" />
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg">
+                                <Trophy className="w-4 h-4 text-[#F98012]" />
                                 <span className="font-medium">{quiz.total_points} pts</span>
                               </div>
                             </div>
@@ -384,7 +451,7 @@ export default function Home() {
                           onClick={() => {
                             if (!isDisabled) {
                               setSelectedQuiz(quiz);
-                              setView('attempt');
+                              setViewAndQuiz('attempt', quiz.id);
                             }
                           }}
                         >
@@ -406,7 +473,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {renderNavigation()}
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {renderContent()}

@@ -9,7 +9,9 @@ import { Plus, Trash2 } from 'lucide-react';
 interface Question {
   question_text: string;
   options: string[];
-  correct_answer: number;
+  // support both new 'identification' and legacy 'numeric'
+  type?: 'multiple' | 'numeric' | 'identification' | 'truefalse';
+  correct_answer: number | string | boolean;
   points: number;
 }
 
@@ -25,9 +27,11 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
   const [duration, setDuration] = useState(quizToEdit?.duration_minutes || 30);
   const [questions, setQuestions] = useState<Question[]>(
     quizToEdit?.questions && quizToEdit.questions.length > 0
-      ? quizToEdit.questions.map(q => ({
+          ? quizToEdit.questions.map(q => ({
           question_text: q.question_text,
-          options: q.options,
+          options: q.options || ['', '', '', ''],
+          // support legacy 'numeric' type by normalizing to 'identification'
+          type: ((q.type as any) === 'numeric' ? 'identification' : (q.type as any)) || 'multiple',
           correct_answer: q.correct_answer,
           points: q.points,
         }))
@@ -35,6 +39,7 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
           {
             question_text: '',
             options: ['', '', '', ''],
+            type: 'multiple',
             correct_answer: 0,
             points: 1,
           },
@@ -130,8 +135,16 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
       const questionsToInsert = questions.map((q) => ({
         quiz_id: quiz.id,
         question_text: q.question_text,
-        options: q.options,
-        correct_answer: q.correct_answer,
+        options: q.type === 'multiple' ? q.options : null,
+        // normalize legacy 'numeric' to 'identification'
+        type: q.type === 'numeric' ? 'identification' : q.type || 'multiple',
+        // Persist identification correct_answer as string, truefalse as boolean, multiple as index
+        correct_answer:
+          q.type === 'numeric' || q.type === 'identification'
+            ? String(q.correct_answer)
+            : q.type === 'truefalse'
+            ? Boolean(q.correct_answer)
+            : Number(q.correct_answer),
         points: q.points,
       }));
 
@@ -253,63 +266,110 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
                   </div>
                   
                   <div>
-                    <Label className="mb-4 block" htmlFor={`question-${questionIndex}-option-0`}>
-                      Answer options
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className="relative">
-                          <Input
-                            id={`question-${questionIndex}-option-${optionIndex}`}
-                            placeholder={`Option ${optionIndex + 1}`}
-                            value={option}
-                            onChange={(e) => updateOption(questionIndex, optionIndex, e.target.value)}
-                            required
-                            className={question.correct_answer === optionIndex ? 'border-green-500 bg-green-50' : ''}
-                          />
-                          {question.correct_answer === optionIndex && (
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`question-${questionIndex}-type`}>Question type</Label>
+                        <select
+                          id={`question-${questionIndex}-type`}
+                          value={question.type || 'multiple'}
+                          onChange={(e) => updateQuestion(questionIndex, 'type', e.target.value)}
+                          className="modern-input"
+                        >
+                          <option value="multiple">Multiple Choice</option>
+                          <option value="identification">Identification / Solving</option>
+                          <option value="truefalse">True / False</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`question-${questionIndex}-points`}>Points</Label>
+                        <Input
+                          id={`question-${questionIndex}-points`}
+                          type="number"
+                          placeholder="1"
+                          value={question.points}
+                          onChange={(e) => updateQuestion(questionIndex, 'points', Number(e.target.value))}
+                          min={1}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Multiple choice options */}
+                    {question.type === 'multiple' && (
+                      <div>
+                        <Label className="mb-4 block" htmlFor={`question-${questionIndex}-option-0`}>
+                          Answer options
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {question.options.map((option, optionIndex) => (
+                            <div key={optionIndex} className="relative">
+                              <Input
+                                id={`question-${questionIndex}-option-${optionIndex}`}
+                                placeholder={`Option ${optionIndex + 1}`}
+                                value={option}
+                                onChange={(e) => updateOption(questionIndex, optionIndex, e.target.value)}
+                                required
+                                className={question.correct_answer === optionIndex ? 'border-green-500 bg-green-50' : ''}
+                              />
+                              {question.correct_answer === optionIndex && (
+                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor={`question-${questionIndex}-correct`}>Correct answer</Label>
-                      <select
-                        id={`question-${questionIndex}-correct`}
-                        value={question.correct_answer}
-                        onChange={(e) => updateQuestion(questionIndex, 'correct_answer', Number(e.target.value))}
-                        className="modern-input"
-                      >
-                        {question.options.map((_, optionIndex) => (
-                          <option key={optionIndex} value={optionIndex}>
-                            Option {optionIndex + 1}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor={`question-${questionIndex}-points`}>Points</Label>
-                      <Input
-                        id={`question-${questionIndex}-points`}
-                        type="number"
-                        placeholder="1"
-                        value={question.points}
-                        onChange={(e) => updateQuestion(questionIndex, 'points', Number(e.target.value))}
-                        min={1}
-                        required
-                      />
-                    </div>
+
+                        <div className="mt-4">
+                          <Label htmlFor={`question-${questionIndex}-correct`}>Correct answer</Label>
+                          <select
+                            id={`question-${questionIndex}-correct`}
+                            value={String(question.correct_answer)}
+                            onChange={(e) => updateQuestion(questionIndex, 'correct_answer', Number(e.target.value))}
+                            className="modern-input"
+                          >
+                            {question.options.map((_, optionIndex) => (
+                              <option key={optionIndex} value={optionIndex}>
+                                Option {optionIndex + 1}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Identification/Solving question correct answer (also supports legacy 'numeric') */}
+                    {(question.type === 'numeric' || question.type === 'identification') && (
+                      <div>
+                        <Label htmlFor={`question-${questionIndex}-numeric`}>Correct identification/answer</Label>
+                        <Input
+                          id={`question-${questionIndex}-numeric`}
+                          placeholder={'e.g. 42 or Euler'}
+                          value={String(question.correct_answer ?? '')}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateQuestion(questionIndex, 'correct_answer', e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+
+                    {/* True/False question */}
+                    {question.type === 'truefalse' && (
+                      <div>
+                        <Label>Correct answer</Label>
+                        <select
+                          value={question.correct_answer ? 1 : 0}
+                          onChange={(e) => updateQuestion(questionIndex, 'correct_answer', Number(e.target.value) === 1)}
+                          className="modern-input"
+                        >
+                          <option value={1}>True</option>
+                          <option value={0}>False</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -323,13 +383,14 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
             disabled={loading}
             loading={loading}
             size="lg"
+            variant="success"
             className="flex-1 sm:flex-none"
           >
             {loading ? (quizToEdit ? 'Updating Quiz...' : 'Creating Quiz...') : (quizToEdit ? 'Update Quiz' : 'Create Quiz')}
           </Button>
           <Button 
             type="button" 
-            variant="secondary" 
+            variant="warning" 
             onClick={onCancel}
             size="lg"
             className="flex-1 sm:flex-none"

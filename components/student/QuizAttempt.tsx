@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Quiz, Question } from '@/types/quiz';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Clock, CircleCheck as CheckCircle } from 'lucide-react';
 
 interface QuizAttemptProps {
@@ -12,7 +13,8 @@ interface QuizAttemptProps {
 
 export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  // answers can be number (option index), string/number (numeric answers), or boolean
+  const [answers, setAnswers] = useState<Record<string, number | string | boolean>>({});
   const [timeLeft, setTimeLeft] = useState(quiz.duration_minutes * 60);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -43,15 +45,52 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
   }, [fetchQuestions]);
 
 
-  const handleAnswerChange = (questionId: string, answerIndex: number) => {
-    setAnswers({ ...answers, [questionId]: answerIndex });
+  const handleAnswerChange = (questionId: string, value: number | string | boolean) => {
+    setAnswers({ ...answers, [questionId]: value });
   };
 
   const calculateScore = useCallback(() => {
     let score = 0;
     questions.forEach((question) => {
-      if (answers[question.id] === question.correct_answer) {
-        score += question.points;
+      const userAns = answers[question.id];
+      const isIdentification = (question.type as any) === 'identification' || (question.type as any) === 'numeric';
+      if (isIdentification) {
+        const expectedRaw = question.correct_answer;
+        const providedRaw = userAns;
+
+        const expectedNumber = Number(expectedRaw);
+        const providedNumber = Number(providedRaw);
+        const bothNumeric = !Number.isNaN(expectedNumber) && !Number.isNaN(providedNumber);
+
+        if (bothNumeric) {
+          if (Math.abs(expectedNumber - providedNumber) < 1e-6) {
+            score += question.points;
+          }
+        } else {
+          const normalize = (value: unknown) =>
+            typeof value === 'string' || typeof value === 'number'
+              ? value.toString().trim().toLowerCase()
+              : typeof value === 'boolean'
+              ? value.toString()
+              : '';
+
+          const normalizedExpected = normalize(expectedRaw);
+          const normalizedProvided = normalize(providedRaw);
+
+          if (normalizedProvided && normalizedProvided === normalizedExpected) {
+            score += question.points;
+          }
+        }
+      } else if (question.type === 'truefalse') {
+        const expected = Boolean(question.correct_answer);
+        if (typeof userAns === 'boolean' && userAns === expected) {
+          score += question.points;
+        }
+      } else {
+        // default: multiple choice (index comparison)
+        if (Number(userAns) === Number(question.correct_answer)) {
+          score += question.points;
+        }
       }
     });
     return score;
@@ -67,17 +106,27 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
+      const { data: latestQuiz, error: latestQuizError } = await supabase
+        .from('quizzes')
+        .select('activation_cycle')
+        .eq('id', quiz.id)
+        .maybeSingle();
+
+      if (latestQuizError) throw latestQuizError;
+      const currentCycle = latestQuiz?.activation_cycle ?? quiz.activation_cycle ?? 0;
+
       const { data: existingAttempt, error: existingAttemptError } = await supabase
         .from('quiz_attempts')
         .select('id')
         .eq('quiz_id', quiz.id)
         .eq('user_id', user.user.id)
+        .eq('activation_cycle', currentCycle)
         .maybeSingle();
 
       if (existingAttemptError) throw existingAttemptError;
 
       if (existingAttempt) {
-        alert('You have already attempted this quiz. Showing your latest results.');
+        alert('You have already attempted this quiz for the current session. Ask your instructor to reactivate the quiz for another try.');
         onComplete();
         return;
       }
@@ -96,6 +145,7 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
         total_points: quiz.total_points,
         percentage,
         answers,
+        activation_cycle: currentCycle,
         time_taken: timeTaken,
       });
 
@@ -107,7 +157,7 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
     } finally {
       setSubmitting(false);
     }
-  }, [answers, calculateScore, quiz.id, quiz.total_points, onComplete, startTime, submitting]);
+  }, [answers, calculateScore, quiz.activation_cycle, quiz.id, quiz.total_points, onComplete, startTime, submitting]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -196,33 +246,75 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
             </div>
 
             <div className="space-y-3">
-              {question.options.map((option, optionIndex) => (
-                <label
-                  key={optionIndex}
-                  className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group/option ${
-                    answers[question.id] === optionIndex
-                      ? 'border-blue-500 bg-blue-50 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={optionIndex}
-                    checked={answers[question.id] === optionIndex}
-                    onChange={() => handleAnswerChange(question.id, optionIndex)}
-                    className="w-5 h-5 mr-4 text-blue-600 focus:ring-blue-500"
+              {/* Render depending on question type */}
+              {((question.type as any) === 'numeric' || (question.type as any) === 'identification') ? (
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Enter numeric answer"
+                    value={String(answers[question.id] ?? '')}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAnswerChange(question.id, e.target.value)}
+                    className="w-full"
                   />
-                  <div className="flex-1">
-                    <span className="text-gray-900 font-medium leading-relaxed">{option}</span>
-                  </div>
-                  {answers[question.id] === optionIndex && (
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+              ) : question.type === 'truefalse' ? (
+                <div className="flex gap-4">
+                  {[true, false].map((val) => (
+                    <label
+                      key={String(val)}
+                      className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group/option ${
+                        answers[question.id] === val
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`question-${question.id}`}
+                        value={val ? 'true' : 'false'}
+                        checked={answers[question.id] === val}
+                        onChange={() => handleAnswerChange(question.id, val)}
+                        className="w-5 h-5 mr-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div className="flex-1">
+                        <span className="text-gray-900 font-medium leading-relaxed">{val ? 'True' : 'False'}</span>
+                      </div>
+                      {answers[question.id] === val && (
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                question.options?.map((option, optionIndex) => (
+                  <label
+                    key={optionIndex}
+                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group/option ${
+                      answers[question.id] === optionIndex
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${question.id}`}
+                      value={optionIndex}
+                      checked={answers[question.id] === optionIndex}
+                      onChange={() => handleAnswerChange(question.id, optionIndex)}
+                      className="w-5 h-5 mr-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div className="flex-1">
+                      <span className="text-gray-900 font-medium leading-relaxed">{option}</span>
                     </div>
-                  )}
-                </label>
-              ))}
+                    {answers[question.id] === optionIndex && (
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </label>
+                ))
+              )}
             </div>
           </div>
         ))}
@@ -245,7 +337,7 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
           
           <div className="flex gap-3">
             <Button 
-              variant="secondary" 
+              variant="warning" 
               onClick={onCancel}
               className="min-w-[120px]"
             >
@@ -256,6 +348,7 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
               disabled={submitting || Object.keys(answers).length === 0}
               loading={submitting}
               size="lg"
+              variant="success"
               className="min-w-[160px]"
             >
               {submitting ? 'Submitting...' : 'Submit Quiz'}

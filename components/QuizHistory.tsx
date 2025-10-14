@@ -2,9 +2,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { QuizAttempt } from '@/types/quiz';
 import { useAuth } from '@/hooks/useAuth';
-import { Clock, Calendar, Trophy, History as HistoryIcon } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Clock, Calendar, Trophy, History as HistoryIcon, Eye } from 'lucide-react';
 
-export const QuizHistory = () => {
+interface QuizHistoryProps {
+  onViewResults?: (attemptId: string) => void;
+}
+
+export const QuizHistory = ({ onViewResults }: QuizHistoryProps) => {
   const { user } = useAuth();
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +107,17 @@ export const QuizHistory = () => {
                     </div>
                   </div>
                 </div>
+                {onViewResults && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onViewResults(attempt.id)}
+                    className="whitespace-nowrap"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                )}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -82,6 +82,7 @@ CREATE TABLE quizzes (
   duration_minutes INTEGER NOT NULL DEFAULT 30,
   total_points INTEGER NOT NULL DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  activation_cycle INTEGER NOT NULL DEFAULT 0,
   created_by UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -108,6 +109,7 @@ CREATE TABLE quiz_attempts (
   percentage INTEGER NOT NULL DEFAULT 0,
   time_taken INTEGER NOT NULL DEFAULT 0,
   answers JSONB,
+  activation_cycle INTEGER NOT NULL DEFAULT 0,
   completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -158,6 +160,15 @@ CREATE POLICY "Anyone can view questions for active quizzes" ON questions
 
 CREATE POLICY "Anyone can view leaderboard" ON quiz_attempts
   FOR SELECT USING (true);
+```
+#### Upgrading an Existing Database
+If you already created the schema before the **activation cycle** feature, run this SQL once to add the required columns:
+
+```sql
+ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS activation_cycle INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS activation_cycle INTEGER NOT NULL DEFAULT 0;
+
+UPDATE quiz_attempts SET activation_cycle = 0 WHERE activation_cycle IS NULL;
 ```
 
 ### 4. Run the Application
@@ -274,13 +285,7 @@ Modify the CSS animations in `app/globals.css`:
 
 ## 🚀 Deployment
 
-### Deploy to Vercel (Recommended)
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add your environment variables
-4. Deploy!
 
-### Deploy to Netlify
 1. Build the project: `npm run build`
 2. Upload the `.next` folder to Netlify
 3. Configure environment variables
@@ -296,15 +301,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_anon_key
 - **Row Level Security**: Database-level access control
 - **Authentication**: Secure user authentication via Supabase
 - **Role-based Access**: Admin and student role separation
-- **Input Validation**: Client and server-side validation
-- **HTTPS**: Secure connections in production
-
 ## 📊 Database Schema
 
-### Tables Overview
-- **quizzes**: Stores quiz metadata and settings
-- **questions**: Individual quiz questions and answers
-- **quiz_attempts**: Student quiz submissions and scores
 - **user_roles**: User role assignments (admin/student)
 
 ### Key Relationships
@@ -367,3 +365,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Made with ❤️ for the education community**
 
 For support or questions, please open an issue on GitHub or contact the development team.
+
+## Migration: add identification / type support to `questions`
+
+If you see the error "Could not find the 'type' column of 'questions' in the schema cache" or "invalid input syntax for type integer" when saving identification answers, run the SQL migration in `db/migrations/2025-10-15-add-question-type-and-correct-answer.sql`.
+
+How to run the migration:
+1. Open Supabase → SQL Editor.
+2. Create a new query and paste the SQL from `db/migrations/2025-10-15-add-question-type-and-correct-answer.sql`.
+3. Run the migration (make sure you have a recent backup first).
+
+What the migration does:
+- Adds a `type` TEXT column (default 'multiple').
+- Makes `options` nullable so non-multiple types work.
+- Converts `correct_answer` from INTEGER to TEXT so identification and true/false answers can be saved.
+
+After running the migration:
+- Use `type` values: 'multiple', 'identification', or 'truefalse'.
+- For multiple choice, keep `options` populated and set `correct_answer` to the option index string (e.g. '0').
+- For identification, set `correct_answer` to the exact expected string (e.g. 'Marie Curie').
+- For true/false, set `correct_answer` to 'true' or 'false'.
+
+Need help tailoring the migration or cleaning data? Let me know and I’ll prepare additional scripts.

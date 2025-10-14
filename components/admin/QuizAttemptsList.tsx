@@ -145,6 +145,9 @@ export const QuizAttemptsList = ({ quiz, onBack }: QuizAttemptsListProps) => {
                 </div>
                 
                 <div className="flex items-center gap-8">
+                  <div className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                    Session {(attempt.activation_cycle ?? 0) + 1}
+                  </div>
                   <div className="text-center">
                     <div className={`text-3xl font-bold ${getGradeColor(attempt.percentage).split(' ')[0]}`}>
                       {attempt.percentage}%
