@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
-const PUBLIC_PATHS = ['/login', '/auth/callback', '/auth/confirm'];
+const PUBLIC_PATHS = ['/', '/login', '/register', '/auth/callback', '/auth/confirm'];
 
 const isPublicPath = (pathname: string) => {
   if (PUBLIC_PATHS.includes(pathname)) {
@@ -33,18 +33,38 @@ export async function middleware(req: NextRequest) {
 
   if (!session && !isRequestingPublicPath) {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = '/login';
+    redirectUrl.pathname = '/';
     redirectUrl.search = '';
     redirectUrl.searchParams.set('redirectTo', `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (session && pathname === '/login') {
+  const userRole = session?.user?.user_metadata?.role;
+
+  if (session && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
     const redirectToParam = searchParams.get('redirectTo');
+    const fallbackPath = userRole === 'admin' ? '/admin' : '/student';
     const destination = redirectToParam && redirectToParam.startsWith('/')
       ? new URL(redirectToParam, req.nextUrl.origin)
-      : new URL('/', req.nextUrl.origin);
+      : new URL(fallbackPath, req.nextUrl.origin);
     return NextResponse.redirect(destination);
+  }
+
+  if (pathname.startsWith('/admin')) {
+    if (!session) {
+      const redirectUrl = req.nextUrl.clone();
+      redirectUrl.pathname = '/';
+      redirectUrl.search = '';
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (userRole !== 'admin') {
+      const fallbackPath = '/student';
+      const redirectUrl = req.nextUrl.clone();
+      redirectUrl.pathname = fallbackPath;
+      redirectUrl.search = '';
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return res;

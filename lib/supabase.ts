@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient, createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -12,6 +12,18 @@ export const supabase = canCreateBrowserClient
       isSingleton: true,
     })
   : null;
+
+export const createSupabaseRouteClient = async () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Route client is only available on the server.');
+  }
+
+  const { cookies } = await import('next/headers');
+  const cookieStore = cookies();
+  return createRouteHandlerClient({
+    cookies: () => cookieStore,
+  });
+};
 
 export const signUp = async (email: string, password: string, role: 'admin' | 'student' = 'student') => {
   if (!supabase) {

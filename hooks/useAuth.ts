@@ -55,7 +55,7 @@ export const useAuth = () => {
     };
 
     void syncUserRole();
-  }, [user?.id, user?.user_metadata?.role]);
+  }, [user]);
 
   const isAdmin = user?.user_metadata?.role === 'admin';
   const isStudent = user?.user_metadata?.role === 'student' || !user?.user_metadata?.role;

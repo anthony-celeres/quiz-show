@@ -8,13 +8,14 @@ import { cn } from '@/lib/utils';
 
 interface AuthFormProps {
   onSuccess: () => void;
+  mode?: 'login' | 'register';
 }
 
-const AuthForm = ({ onSuccess }: AuthFormProps) => {
+const AuthForm = ({ onSuccess, mode = 'login' }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'student' | 'admin'>('student');
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(mode !== 'register');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
