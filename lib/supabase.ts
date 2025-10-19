@@ -1,4 +1,4 @@
-import { createClientComponentClient, createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -6,11 +6,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const canCreateBrowserClient = typeof window !== 'undefined' && supabaseUrl && supabaseAnonKey;
 
 export const supabase = canCreateBrowserClient
-  ? createClientComponentClient({
-      supabaseUrl,
-      supabaseKey: supabaseAnonKey,
-      isSingleton: true,
-    })
+  ? createBrowserClient(supabaseUrl, supabaseAnonKey)
   : null;
 
 export const createSupabaseRouteClient = async () => {
@@ -18,11 +14,33 @@ export const createSupabaseRouteClient = async () => {
     throw new Error('Route client is only available on the server.');
   }
 
+  const { createServerClient } = await import('@supabase/ssr');
   const { cookies } = await import('next/headers');
-  const cookieStore = cookies();
-  return createRouteHandlerClient({
-    cookies: () => cookieStore,
-  });
+  
+  const cookieStore = await cookies();
+  
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  );
 };
 
 export const signUp = async (email: string, password: string, role: 'challenger' = 'challenger') => {
