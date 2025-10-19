@@ -36,23 +36,23 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border/60 bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href="/" className="flex items-center gap-2 text-primary">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
-              <BookOpen className="h-6 w-6" />
+      <header className="border-b border-border/60 bg-white/95 backdrop-blur dark:bg-gray-900/95 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 py-4 sm:py-5">
+          <Link href="/" className="flex items-center gap-2 text-primary flex-shrink-0">
+            <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <span className="text-2xl font-bold tracking-tight">QuizMaster</span>
+            <span className="text-xl sm:text-2xl font-bold tracking-tight">QuizMaster</span>
           </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground">Features</a>
-            <a href="#how-it-works" className="hover:text-foreground">How it works</a>
+          <nav className="hidden items-center gap-4 lg:gap-6 text-sm font-medium text-foreground md:flex">
+            <a href="#features" className="hover:text-primary transition-colors">Features</a>
+            <a href="#how-it-works" className="hover:text-primary transition-colors">How it works</a>
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className={cn(buttonVariants({ variant: 'ghost' }))}>
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'hidden sm:inline-flex')}>
               Sign in
             </Link>
-            <Link href="/register" className={cn(buttonVariants())}>
+            <Link href="/register" className={cn(buttonVariants({ size: 'sm' }), 'text-xs sm:text-sm whitespace-nowrap')}>
               Create account
             </Link>
           </div>
@@ -60,27 +60,27 @@ export default function LandingPage() {
       </header>
 
       <main className="relative overflow-hidden">
-        <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-20 text-center md:flex-row md:items-center md:text-left">
+        <section className="mx-auto flex max-w-6xl flex-col gap-10 px-4 sm:px-6 py-12 sm:py-20 text-center md:flex-row md:items-center md:text-left">
           <div className="md:w-1/2 space-y-6">
             <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-sm font-medium text-primary">
               Challenge yourself and others
             </span>
-            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
               Create quizzes, challenge friends, compete for the top spot.
             </h1>
-            <p className="text-lg leading-relaxed text-muted-foreground">
+            <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
               QuizMaster lets you create your own quizzes, take challenges from others, and climb the leaderboard. Everyone is a challenger—create, compete, and conquer.
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row md:justify-start">
               <Link
                 href="/register"
-                className={cn(buttonVariants({ size: 'lg' }))}
+                className={cn(buttonVariants({ size: 'lg' }), 'w-full sm:w-auto min-w-[160px]')}
               >
                 Get started
               </Link>
               <Link
                 href="/login"
-                className={cn(buttonVariants({ size: 'lg', variant: 'secondary' }))}
+                className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'w-full sm:w-auto min-w-[160px]')}
               >
                 I already have an account
               </Link>
@@ -121,8 +121,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="features" className="bg-muted/40 py-20">
-          <div className="mx-auto grid max-w-6xl gap-8 px-6 md:grid-cols-3">
+        <section id="features" className="bg-muted/40 dark:bg-muted/20 py-12 sm:py-20">
+          <div className="mx-auto grid max-w-6xl gap-6 sm:gap-8 px-4 sm:px-6 md:grid-cols-3">
             {[
               {
                 title: 'Effortless authoring',
@@ -145,15 +145,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-20">
-          <div className="modern-card p-8 text-center">
-            <h3 className="text-2xl font-semibold text-foreground mb-4">Everyone is a Challenger</h3>
-            <p className="text-muted-foreground mb-6 max-w-3xl mx-auto">
+        <section id="how-it-works" className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-20">
+          <div className="modern-card p-6 sm:p-8 text-center">
+            <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-4">Everyone is a Challenger</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-3xl mx-auto">
               Create your own quizzes to challenge others, take quizzes to test your knowledge, and climb the leaderboard to prove you&apos;re the best. QuizMaster empowers every user to create, compete, and conquer.
             </p>
             <Link
               href="/register"
-              className={cn(buttonVariants({ size: 'lg' }), 'mt-4')}
+              className={cn(buttonVariants({ size: 'lg' }), 'mt-4 w-full sm:w-auto min-w-[200px]')}
             >
               Join as a challenger
             </Link>
@@ -161,8 +161,8 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border/60 bg-white/70">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm text-muted-foreground md:flex-row">
+      <footer className="border-t border-border/60 bg-white/95 dark:bg-gray-900/95 dark:border-gray-700">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:px-6 py-6 text-sm text-muted-foreground md:flex-row">
           <p>© {new Date().getFullYear()} QuizMaster. Empowering learning communities.</p>
           <div className="flex gap-4">
             <Link href="/login" className="hover:text-foreground">Sign in</Link>
