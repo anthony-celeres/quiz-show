@@ -189,61 +189,63 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
   });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      <div className="bg-white p-6 rounded-2xl shadow-lg">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center ${
+              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center ${
                 attempt.percentage >= 70 ? 'bg-green-100' : 'bg-rose-100'
               }`}
             >
               {attempt.percentage >= 70 ? (
-                <Trophy className="w-7 h-7 text-green-600" />
+                <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               ) : (
-                <XCircle className="w-7 h-7 text-rose-600" />
+                <XCircle className="w-6 h-6 sm:w-7 sm:h-7 text-rose-600" />
               )}
             </div>
             <div>
-              <h2 className="text-xl font-bold">Quiz Completed!</h2>
-              <p className="text-sm text-gray-600">{attempt.quiz?.title}</p>
+              <h2 className="text-lg sm:text-xl font-bold">Quiz Completed!</h2>
+              <p className="text-xs sm:text-sm text-gray-600 break-words">{attempt.quiz?.title}</p>
             </div>
           </div>
           
-          <div className="text-right">
-            <div className={`text-3xl font-bold ${color}`}>{attempt.percentage}%</div>
-            <div className="text-sm text-gray-600">Grade: {grade}</div>
+          <div className="text-left sm:text-right w-full sm:w-auto">
+            <div className={`text-2xl sm:text-3xl font-bold ${color}`}>{attempt.percentage}%</div>
+            <div className="text-xs sm:text-sm text-gray-600">Grade: {grade}</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{attempt.score}/{attempt.total_points}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+          <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+            <div className="text-base sm:text-lg font-bold text-gray-900">{attempt.score}/{attempt.total_points}</div>
             <div className="text-xs text-gray-600">Score</div>
           </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{formatTime(attempt.time_taken)}</div>
+          <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+            <div className="text-base sm:text-lg font-bold text-gray-900">{formatTime(attempt.time_taken)}</div>
             <div className="text-xs text-gray-600">Time</div>
           </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{questions.length}</div>
+          <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+            <div className="text-base sm:text-lg font-bold text-gray-900">{questions.length}</div>
             <div className="text-xs text-gray-600">Questions</div>
           </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">
+          <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+            <div className="text-base sm:text-lg font-bold text-gray-900">
               {new Date(attempt.completed_at).toLocaleDateString()}
             </div>
             <div className="text-xs text-gray-600">Completed</div>
           </div>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <Button onClick={onClose} variant="outline">Back to Quizzes</Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+          <Button onClick={onClose} variant="outline" className="w-full sm:w-auto sm:min-w-[160px]">
+            Back to Quizzes
+          </Button>
           {onToggleLeaderboard && (
-            <Button onClick={onToggleLeaderboard} variant="default">
+            <Button onClick={onToggleLeaderboard} variant="default" className="w-full sm:w-auto sm:min-w-[160px]">
               {showLeaderboard ? 'Hide Leaderboard' : 'View Leaderboard'}
             </Button>
           )}
@@ -253,10 +255,10 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
       {/* Mini Leaderboard - Rendered between Quiz Completed and Answer Review */}
       {showLeaderboard && leaderboardContent}
 
-      <div className="bg-white p-8 rounded-3xl shadow-lg">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-gray-900">Answer Review</h3>
-          <p className="text-gray-600">Compare your responses with the correct answers.</p>
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-lg">
+        <div className="text-center mb-6 sm:mb-8">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Answer Review</h3>
+          <p className="text-sm sm:text-base text-gray-600">Compare your responses with the correct answers.</p>
         </div>
 
         {questions.length === 0 ? (
@@ -291,7 +293,7 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
             </div>
 
             {/* Questions List */}
-            <div className="flex-1 space-y-6">
+            <div className="flex-1 space-y-4 sm:space-y-6">
             {questions.map((question, index) => {
               const studentValue = (answers as Record<string, unknown>)[question.id];
               const status = buildStatus(question, studentValue);
@@ -302,61 +304,61 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
                 <div
                   key={question.id}
                   id={`question-${question.id}`}
-                  className={`rounded-2xl border ${status.containerClass} p-6 transition-all duration-200`}
+                  className={`rounded-xl sm:rounded-2xl border ${status.containerClass} p-4 sm:p-6 transition-all duration-200`}
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold flex items-center justify-center">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start gap-2 sm:gap-3 mb-2">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm sm:text-base font-semibold flex items-center justify-center flex-shrink-0">
                           {index + 1}
                         </div>
-                        <h4 className="text-lg font-semibold text-gray-900 leading-relaxed">
+                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 leading-relaxed break-words">
                           {question.question_text}
                         </h4>
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
-                          {question.points} {question.points === 1 ? 'point' : 'points'}
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 ml-10 sm:ml-[52px]">
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
+                          {question.points} {question.points === 1 ? 'pt' : 'pts'}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide bg-gray-100 text-gray-600">
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide bg-gray-100 text-gray-600">
                           {normalizeType(question) === 'multiple'
-                            ? 'Multiple Choice'
+                            ? 'Multiple'
                             : normalizeType(question) === 'truefalse'
-                            ? 'True / False'
-                            : 'Identification'}
+                            ? 'T/F'
+                            : 'ID'}
                         </span>
                       </div>
                     </div>
 
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${status.badgeClass}`}>
+                    <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${status.badgeClass} self-start`}>
                       {status.icon}
                       <span>{status.label}</span>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm">
+                  <div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
+                    <div className="rounded-xl sm:rounded-2xl border border-white/70 bg-white/80 p-3 sm:p-4 shadow-sm">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                         Your Answer
                       </p>
-                      <p className="mt-2 text-sm text-gray-900 whitespace-pre-wrap">{studentAnswer}</p>
+                      <p className="mt-2 text-sm text-gray-900 whitespace-pre-wrap break-words">{studentAnswer}</p>
                     </div>
-                    <div className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm">
+                    <div className="rounded-xl sm:rounded-2xl border border-white/70 bg-white/80 p-3 sm:p-4 shadow-sm">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                         Correct Answer
                       </p>
-                      <p className="mt-2 text-sm text-gray-900 whitespace-pre-wrap">{correctAnswer}</p>
+                      <p className="mt-2 text-sm text-gray-900 whitespace-pre-wrap break-words">{correctAnswer}</p>
                     </div>
                   </div>
 
                   {normalizeType(question) === 'multiple' && (question.options?.length ?? 0) > 0 && (
-                    <details className="mt-4 bg-white/60 rounded-xl border border-gray-200 p-4 text-sm text-gray-700">
+                    <details className="mt-3 sm:mt-4 bg-white/60 rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 text-xs sm:text-sm text-gray-700">
                       <summary className="cursor-pointer font-semibold text-gray-800">
                         View all choices
                       </summary>
-                      <ol className="mt-3 space-y-2 list-decimal list-inside">
+                      <ol className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2 list-decimal list-inside">
                         {question.options?.map((option, optionIndex) => (
-                          <li key={optionIndex} className="text-gray-700">
+                          <li key={optionIndex} className="text-gray-700 break-words">
                             {option || <span className="text-gray-400">(Empty option)</span>}
                           </li>
                         ))}

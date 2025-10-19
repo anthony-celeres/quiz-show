@@ -69,59 +69,64 @@ export const QuizHistory = ({ onViewResults }: QuizHistoryProps) => {
       </div>
       
       {attempts.length === 0 ? (
-        <div className="modern-card p-12 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-            <HistoryIcon className="h-12 w-12 text-muted-foreground" />
+        <div className="modern-card p-8 sm:p-12 text-center">
+          <div className="mx-auto mb-4 sm:mb-6 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-muted">
+            <HistoryIcon className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Quiz History Yet</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">No Quiz History Yet</h3>
+          <p className="text-sm sm:text-base text-muted-foreground px-4">
             Start taking quizzes to build your learning history!
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {attempts.map((attempt) => (
             <div 
               key={attempt.id} 
-              className="modern-card p-6 hover:shadow-md transition-shadow"
+              className="modern-card p-4 sm:p-6 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 {/* Quiz Title and Score */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
+                <div className="flex-1 min-w-0 w-full">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1 sm:mb-1 break-words">
                     {attempt.quiz?.title}
                   </h3>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Trophy className="h-4 w-4" />
-                      {attempt.score}/{attempt.total_points} pts
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1 whitespace-nowrap">
+                      <Trophy className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="truncate">{attempt.score}/{attempt.total_points} pts</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
+                    <span className="flex items-center gap-1 whitespace-nowrap">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                       {formatTime(attempt.time_taken)}
                     </span>
-                    <span>
+                    <span className="text-xs sm:text-sm">
                       {new Date(attempt.completed_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
 
-                {/* Percentage Score */}
-                <div className={`text-2xl font-bold ${getGradeColor(attempt.percentage)}`}>
-                  {attempt.percentage}%
-                </div>
+                {/* Percentage Score and Button Container */}
+                <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                  {/* Percentage Score */}
+                  <div className={`text-xl sm:text-2xl font-bold ${getGradeColor(attempt.percentage)} flex-shrink-0`}>
+                    {attempt.percentage}%
+                  </div>
 
-                {/* View Details Button */}
-                {onViewResults && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onViewResults(attempt.id)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Details
-                  </Button>
-                )}
+                  {/* View Details Button */}
+                  {onViewResults && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewResults(attempt.id)}
+                      className="text-xs sm:text-sm whitespace-nowrap"
+                    >
+                      <Eye className="h-4 w-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Details</span>
+                      <span className="sm:hidden">View</span>
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

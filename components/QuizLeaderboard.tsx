@@ -68,51 +68,51 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
 
   if (loading) {
     return (
-      <div className="modern-card p-6">
+      <div className="modern-card p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
           {onToggle && (
             <button
               onClick={onToggle}
               className="p-2 hover:bg-muted rounded-lg transition-colors"
               aria-label="Toggle leaderboard"
             >
-              {isVisible ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              {isVisible ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
           )}
         </div>
-        {isVisible && <p className="text-sm text-muted-foreground">Loading...</p>}
+        {isVisible && <p className="text-xs sm:text-sm text-muted-foreground">Loading...</p>}
       </div>
     );
   }
 
   if (attempts.length === 0) {
     return (
-      <div className="modern-card p-6">
+      <div className="modern-card p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
           {onToggle && (
             <button
               onClick={onToggle}
               className="p-2 hover:bg-muted rounded-lg transition-colors"
               aria-label="Toggle leaderboard"
             >
-              {isVisible ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              {isVisible ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
           )}
         </div>
-        {isVisible && <p className="text-sm text-muted-foreground">No attempts yet. Be the first!</p>}
+        {isVisible && <p className="text-xs sm:text-sm text-muted-foreground">No attempts yet. Be the first!</p>}
       </div>
     );
   }
 
   return (
-    <div className="modern-card p-6">
+    <div className="modern-card p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
-          <span className="text-sm text-muted-foreground">Top {attempts.length}</span>
+          <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">Quiz Leaderboard</h3>
+          <span className="hidden sm:inline text-sm text-muted-foreground">Top {attempts.length}</span>
         </div>
         {onToggle && (
           <button
@@ -120,7 +120,7 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
             className="p-2 hover:bg-muted rounded-lg transition-colors"
             aria-label="Toggle leaderboard"
           >
-            {isVisible ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            {isVisible ? <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />}
           </button>
         )}
       </div>
@@ -134,33 +134,33 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
           return (
             <div
               key={attempt.id}
-              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+              className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border transition-colors ${
                 isTopThree ? 'border-primary/30 bg-primary/5' : 'border-border hover:bg-muted/50'
               }`}
             >
               {/* Rank */}
-              <div className={`text-lg font-bold min-w-[2.5rem] text-center ${rank.color}`}>
+              <div className={`text-base sm:text-lg font-bold min-w-[2rem] sm:min-w-[2.5rem] text-center ${rank.color}`}>
                 {rank.emoji}
               </div>
 
               {/* User */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-xs sm:text-sm font-medium text-foreground truncate">
                   {attempt.display_name || attempt.username || attempt.user_email}
                 </p>
                 {attempt.username && (
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground truncate hidden sm:block">
                     @{attempt.username}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground hidden sm:block">
                   {new Date(attempt.completed_at).toLocaleDateString()}
                 </p>
               </div>
 
               {/* Score */}
               <div className="text-right">
-                <div className={`text-lg font-bold ${rank.color}`}>
+                <div className={`text-base sm:text-lg font-bold ${rank.color}`}>
                   {attempt.percentage}%
                 </div>
                 <div className="text-xs text-muted-foreground">
@@ -169,7 +169,7 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
               </div>
 
               {/* Time */}
-              <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-[4rem] justify-end">
+              <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground min-w-[4rem] justify-end">
                 <Clock className="h-3 w-3" />
                 <span>{formatTime(attempt.time_taken)}</span>
               </div>

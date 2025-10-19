@@ -119,7 +119,7 @@
   }
 
   .responsive-grid {
-    @apply grid gap-6 sm:grid-cols-2 xl:grid-cols-3;
+    @apply grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3;
   }
 
   .modern-card {

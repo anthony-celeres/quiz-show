@@ -105,30 +105,30 @@ export const Leaderboard = () => {
   };
 
   if (loading) {
-    return <div className="modern-card p-8">Loading leaderboard...</div>;
+    return <div className="modern-card p-6 sm:p-8">Loading leaderboard...</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="text-center">
-        <h2 className="text-4xl font-bold gradient-text mb-3">Leaderboard</h2>
-        <p className="text-muted-foreground text-lg">
+        <h2 className="text-3xl sm:text-4xl font-bold gradient-text mb-2 sm:mb-3">Leaderboard</h2>
+        <p className="text-muted-foreground text-base sm:text-lg px-4">
           Top performers based on average performance
         </p>
       </div>
       
       {leaders.length === 0 ? (
-        <div className="modern-card p-12 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-            <Trophy className="h-12 w-12 text-muted-foreground" />
+        <div className="modern-card p-8 sm:p-12 text-center">
+          <div className="mx-auto mb-4 sm:mb-6 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-muted">
+            <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">No Scores Yet</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">No Scores Yet</h3>
+          <p className="text-sm sm:text-base text-muted-foreground px-4">
             Be the first to take a quiz and appear on the leaderboard!
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {leaders.map((leader, index) => {
             const rank = getRankDisplay(index + 1);
             const isTopThree = index < 3;
@@ -136,19 +136,19 @@ export const Leaderboard = () => {
             return (
               <div
                 key={leader.user_id}
-                className={`modern-card p-5 hover:shadow-md transition-shadow ${
+                className={`modern-card p-3 sm:p-5 hover:shadow-md transition-shadow ${
                   isTopThree ? 'border-l-4 border-l-primary' : ''
                 }`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                   {/* Rank */}
-                  <div className={`text-2xl font-bold min-w-[3rem] text-center ${rank.color}`}>
+                  <div className={`text-xl sm:text-2xl font-bold min-w-[2.5rem] sm:min-w-[3rem] text-center ${rank.color} flex-shrink-0`}>
                     {rank.emoji}
                   </div>
 
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
+                    <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
                       {leader.display_name || leader.username || leader.user_email}
                     </h3>
                     {leader.username && (
@@ -156,23 +156,23 @@ export const Leaderboard = () => {
                         @{leader.username}
                       </p>
                     )}
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {leader.total_attempts} quiz{leader.total_attempts !== 1 ? 'zes' : ''} taken
                     </p>
                   </div>
 
                   {/* Stats */}
-                  <div className="flex items-center gap-6 text-sm">
+                  <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm flex-shrink-0">
                     <div className="text-right">
-                      <div className={`text-xl font-bold ${rank.color}`}>
+                      <div className={`text-lg sm:text-xl font-bold ${rank.color}`}>
                         {leader.avg_percentage}%
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground hidden sm:block">
                         avg score
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-right hidden sm:block">
                       <div className="text-lg font-semibold text-foreground">
                         {leader.best_score}%
                       </div>
@@ -181,7 +181,7 @@ export const Leaderboard = () => {
                       </div>
                     </div>
 
-                    <div className="text-right text-muted-foreground">
+                    <div className="text-right hidden md:block text-muted-foreground">
                       <div className="text-lg font-semibold">
                         {leader.total_score}/{leader.total_possible}
                       </div>
