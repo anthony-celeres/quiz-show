@@ -43,40 +43,40 @@
   }
 
   .dark {
-    --background: 215 28% 12%;
-    --foreground: 210 40% 96%;
+    --background: 222 47% 11%; /* #0F172A - darker, more consistent */
+    --foreground: 210 40% 98%; /* #F8FAFC - brighter text */
 
-    --muted: 218 26% 18%;
-    --muted-foreground: 215 12% 70%;
+    --muted: 217 33% 17%; /* #1E293B - consistent with design */
+    --muted-foreground: 215 20% 65%; /* #94A3B8 - readable gray */
 
-    --popover: 215 28% 12%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --card: 218 30% 14%;
-    --card-foreground: 210 40% 96%;
+    --card: 217 33% 14%; /* #182230 - slightly lighter than bg */
+    --card-foreground: 210 40% 98%;
 
-    --border: 218 20% 25%;
-    --input: 218 20% 25%;
+    --border: 217 33% 23%; /* #2D3748 - visible borders */
+    --input: 217 33% 23%;
 
-    --primary: 211 100% 70%;
-    --primary-foreground: 215 28% 12%;
+    --primary: 211 100% 50%; /* #0066FF - brighter blue for dark mode */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 29 95% 58%;
-    --secondary-foreground: 215 28% 12%;
+    --secondary: 29 95% 58%; /* #FB923C - orange that works in dark */
+    --secondary-foreground: 0 0% 100%;
 
-    --accent: 215 24% 22%;
-    --accent-foreground: 210 40% 96%;
+    --accent: 217 33% 20%; /* #273548 - subtle accent */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 78% 60%;
-    --destructive-foreground: 210 40% 96%;
+    --destructive: 0 72% 51%; /* #DC2626 - red */
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 142 64% 52%;
-    --success-foreground: 210 40% 96%;
+    --success: 142 71% 45%; /* #16A34A - green */
+    --success-foreground: 210 40% 98%;
 
-    --warning: 48 90% 60%;
-    --warning-foreground: 215 28% 12%;
+    --warning: 48 96% 53%; /* #EAB308 - yellow */
+    --warning-foreground: 222 47% 11%;
 
-    --ring: 211 100% 70%;
+    --ring: 211 100% 50%;
   }
 }
 
@@ -91,11 +91,11 @@
 
 @layer components {
   .glass {
-    @apply border border-border bg-white/70 backdrop-blur-md shadow-sm;
+    @apply border border-border bg-white/70 backdrop-blur-md shadow-sm dark:bg-card/70 dark:border-gray-700;
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-[#0056B3] via-[#1E3A8A] to-[#0A2E63] bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#0056B3] via-[#1E3A8A] to-[#0A2E63] bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-500 dark:to-blue-600;
   }
 
   .progress-bar {
@@ -107,15 +107,15 @@
   }
 
   .status-active {
-    @apply inline-flex items-center rounded-full bg-[#E3EEF9] px-3 py-1 text-xs font-medium text-[#0A2E63] dark:bg-[#123967] dark:text-white/90;
+    @apply inline-flex items-center rounded-full bg-[#E3EEF9] px-3 py-1 text-xs font-medium text-[#0A2E63] dark:bg-blue-500/20 dark:text-blue-300;
   }
 
   .status-inactive {
-    @apply inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground;
+    @apply inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground dark:bg-gray-700 dark:text-gray-300;
   }
 
   .status-pending {
-    @apply inline-flex items-center rounded-full bg-[#FEF3C7] px-3 py-1 text-xs font-medium text-[#92400E] dark:bg-[#4F3B00] dark:text-amber-200;
+    @apply inline-flex items-center rounded-full bg-[#FEF3C7] px-3 py-1 text-xs font-medium text-[#92400E] dark:bg-yellow-500/20 dark:text-yellow-300;
   }
 
   .responsive-grid {
@@ -123,7 +123,7 @@
   }
 
   .modern-card {
-    @apply rounded-xl border border-border bg-card shadow-sm transition-shadow duration-200 hover:shadow-md;
+    @apply rounded-xl border border-border bg-card shadow-sm transition-shadow duration-200 hover:shadow-md dark:border-gray-700 dark:bg-card dark:hover:shadow-lg dark:hover:shadow-primary/10;
   }
 }
 

@@ -65,8 +65,8 @@ export default function ChallengerLayout({ children }: { children: ReactNode }) 
                 href={item.href}
                 className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#0056B3] text-white shadow'
-                    : 'text-[#0056B3] hover:bg-[#0056B3]/10'
+                    ? 'bg-[#0056B3] text-white shadow dark:bg-primary'
+                    : 'text-[#0056B3] hover:bg-[#0056B3]/10 dark:text-primary dark:hover:bg-primary/20'
                 }`}
               >
                 {item.label}

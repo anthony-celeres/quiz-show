@@ -139,7 +139,7 @@ const AuthForm = ({ onSuccess, mode = 'login' }: AuthFormProps) => {
               </div>
             )}
 
-            <Button type="submit" size="lg" className="w-full" loading={loading} disabled={loading}>
+            <Button type="submit" size="lg" className="w-full text-base sm:text-lg h-11 sm:h-12" loading={loading} disabled={loading}>
               {isLogin ? 'Sign in' : 'Create account'}
             </Button>
           </form>
