@@ -9,16 +9,15 @@ import { cn } from '@/lib/utils';
 import { BookOpen, Trophy, Users, ShieldCheck } from 'lucide-react';
 
 export default function LandingPage() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (loading) return;
     if (!user) return;
 
-    const destination = isAdmin ? '/admin' : '/student';
-    router.replace(destination);
-  }, [user, loading, isAdmin, router]);
+    router.replace('/challenger');
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -47,8 +46,7 @@ export default function LandingPage() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
             <a href="#features" className="hover:text-foreground">Features</a>
-            <a href="#roles" className="hover:text-foreground">For Students</a>
-            <a href="#roles" className="hover:text-foreground">For Admins</a>
+            <a href="#how-it-works" className="hover:text-foreground">How it works</a>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className={cn(buttonVariants({ variant: 'ghost' }))}>
@@ -65,13 +63,13 @@ export default function LandingPage() {
         <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-20 text-center md:flex-row md:items-center md:text-left">
           <div className="md:w-1/2 space-y-6">
             <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-sm font-medium text-primary">
-              Your campus-ready quiz platform
+              Challenge yourself and others
             </span>
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Assess with confidence, learn with purpose.
+              Create quizzes, challenge friends, compete for the top spot.
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
-              QuizMaster streamlines quiz creation, delivery, and analysis for academic teams. Engage students with polished experiences and track outcomes in real time.
+              QuizMaster lets you create your own quizzes, take challenges from others, and climb the leaderboard. Everyone is a challenger—create, compete, and conquer.
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row md:justify-start">
               <Link
@@ -97,8 +95,8 @@ export default function LandingPage() {
                   <ShieldCheck className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground">Secure & role-aware</p>
-                  <p className="text-lg font-semibold text-foreground">Supabase-backed authentication with admin/student flows.</p>
+                  <p className="text-sm font-semibold text-muted-foreground">Secure & reliable</p>
+                  <p className="text-lg font-semibold text-foreground">Supabase-backed authentication for every challenger.</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -106,7 +104,7 @@ export default function LandingPage() {
                   <Users className="h-6 w-6 text-[#0056B3]" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground">Student success tools</p>
+                  <p className="text-sm font-semibold text-muted-foreground">Challenger success tools</p>
                   <p className="text-lg font-semibold text-foreground">Timed attempts, progress tracking, history, and leaderboard.</p>
                 </div>
               </div>
@@ -131,7 +129,7 @@ export default function LandingPage() {
                 description: 'Create detailed quizzes, mix question types, and control availability with activation cycles.',
               },
               {
-                title: 'Student-first design',
+                title: 'Challenger-first design',
                 description: 'Responsive UI, accessible typography, and calming academic visuals keep learners focused.',
               },
               {
@@ -147,33 +145,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="roles" className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-20 md:flex-row">
-          <div className="modern-card flex-1 p-8">
-            <h3 className="text-2xl font-semibold text-foreground">For Students</h3>
-            <ul className="mt-6 space-y-3 text-muted-foreground">
-              <li>• Attempt quizzes once per cycle with adaptive timers.</li>
-              <li>• Review results instantly and track personal growth.</li>
-              <li>• Climb the leaderboard and celebrate milestones.</li>
-            </ul>
+        <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-20">
+          <div className="modern-card p-8 text-center">
+            <h3 className="text-2xl font-semibold text-foreground mb-4">Everyone is a Challenger</h3>
+            <p className="text-muted-foreground mb-6 max-w-3xl mx-auto">
+              Create your own quizzes to challenge others, take quizzes to test your knowledge, and climb the leaderboard to prove you&apos;re the best. QuizMaster empowers every user to create, compete, and conquer.
+            </p>
             <Link
               href="/register"
-              className={cn(buttonVariants({ variant: 'secondary' }), 'mt-6 inline-flex')}
+              className={cn(buttonVariants({ size: 'lg' }), 'mt-4')}
             >
-              Join as a student
-            </Link>
-          </div>
-          <div className="modern-card flex-1 p-8">
-            <h3 className="text-2xl font-semibold text-foreground">For Educators</h3>
-            <ul className="mt-6 space-y-3 text-muted-foreground">
-              <li>• Build quizzes quickly and reuse them across terms.</li>
-              <li>• Monitor attempts in real time with detailed analytics.</li>
-              <li>• Ensure academic integrity with secure Supabase auth.</li>
-            </ul>
-            <Link
-              href="/register"
-              className={cn(buttonVariants(), 'mt-6 inline-flex')}
-            >
-              Become an admin
+              Join as a challenger
             </Link>
           </div>
         </section>

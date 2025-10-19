@@ -39,32 +39,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  const userRole = session?.user?.user_metadata?.role;
-
   if (session && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
     const redirectToParam = searchParams.get('redirectTo');
-    const fallbackPath = userRole === 'admin' ? '/admin' : '/student';
+    const fallbackPath = '/challenger';
     const destination = redirectToParam && redirectToParam.startsWith('/')
       ? new URL(redirectToParam, req.nextUrl.origin)
       : new URL(fallbackPath, req.nextUrl.origin);
     return NextResponse.redirect(destination);
-  }
-
-  if (pathname.startsWith('/admin')) {
-    if (!session) {
-      const redirectUrl = req.nextUrl.clone();
-      redirectUrl.pathname = '/';
-      redirectUrl.search = '';
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    if (userRole !== 'admin') {
-      const fallbackPath = '/student';
-      const redirectUrl = req.nextUrl.clone();
-      redirectUrl.pathname = fallbackPath;
-      redirectUrl.search = '';
-      return NextResponse.redirect(redirectUrl);
-    }
   }
 
   return res;

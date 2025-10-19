@@ -1,10 +1,14 @@
 import { QuizAttempt, Question } from '@/types/quiz';
 import { Button } from '@/components/ui/Button';
 import { CircleCheck as CheckCircle, CircleX as XCircle, Clock, Trophy } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface QuizResultsProps {
   attempt: QuizAttempt;
   onClose: () => void;
+  onToggleLeaderboard?: () => void;
+  showLeaderboard?: boolean;
+  leaderboardContent?: React.ReactNode;
 }
 
 const normalizeType = (question: Question) => {
@@ -142,7 +146,7 @@ const buildStatus = (question: Question, studentValue: unknown) => {
   };
 };
 
-export const QuizResults = ({ attempt, onClose }: QuizResultsProps) => {
+export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderboard, leaderboardContent }: QuizResultsProps) => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -157,69 +161,97 @@ export const QuizResults = ({ attempt, onClose }: QuizResultsProps) => {
     return { grade: 'F', color: 'text-red-600' };
   };
 
+  const scrollToQuestion = (questionId: string) => {
+    const element = document.getElementById(`question-${questionId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const { grade, color } = getGrade(attempt.percentage);
   const questions = attempt.quiz?.questions ?? [];
   const answers = attempt.answers ?? {};
 
+  // Create question navigation data
+  const questionNavigation = questions.map((question, index) => {
+    const studentValue = (answers as Record<string, unknown>)[question.id];
+    const status = buildStatus(question, studentValue);
+    const isCorrect = isAnswerCorrect(question, studentValue);
+    const isAnswered = hasProvidedAnswer(question, studentValue);
+    
+    return {
+      id: question.id,
+      number: index + 1,
+      isCorrect,
+      isAnswered,
+      status: status.label
+    };
+  });
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      <div className="bg-white p-8 rounded-3xl shadow-lg">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+      <div className="bg-white p-6 rounded-2xl shadow-lg">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center ${
+              className={`w-14 h-14 rounded-full flex items-center justify-center ${
                 attempt.percentage >= 70 ? 'bg-green-100' : 'bg-rose-100'
               }`}
             >
               {attempt.percentage >= 70 ? (
-                <Trophy className="w-10 h-10 text-green-600" />
+                <Trophy className="w-7 h-7 text-green-600" />
               ) : (
-                <XCircle className="w-10 h-10 text-rose-600" />
+                <XCircle className="w-7 h-7 text-rose-600" />
               )}
             </div>
+            <div>
+              <h2 className="text-xl font-bold">Quiz Completed!</h2>
+              <p className="text-sm text-gray-600">{attempt.quiz?.title}</p>
+            </div>
           </div>
-
-          <h2 className="text-3xl font-bold mb-2">Quiz Completed!</h2>
-          <p className="text-gray-600">{attempt.quiz?.title}</p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900">{attempt.score}</div>
-            <div className="text-sm text-gray-600">Score</div>
-          </div>
-
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900">{attempt.total_points}</div>
-            <div className="text-sm text-gray-600">Total Points</div>
-          </div>
-
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className={`text-2xl font-bold ${color}`}>{attempt.percentage}%</div>
-            <div className="text-sm text-gray-600">Percentage</div>
-          </div>
-
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className={`text-2xl font-bold ${color}`}>{grade}</div>
-            <div className="text-sm text-gray-600">Grade</div>
+          
+          <div className="text-right">
+            <div className={`text-3xl font-bold ${color}`}>{attempt.percentage}%</div>
+            <div className="text-sm text-gray-600">Grade: {grade}</div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-8 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            <span>Time: {formatTime(attempt.time_taken)}</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">{attempt.score}/{attempt.total_points}</div>
+            <div className="text-xs text-gray-600">Score</div>
           </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-600" />
-            <span>Completed: {new Date(attempt.completed_at).toLocaleString()}</span>
+
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">{formatTime(attempt.time_taken)}</div>
+            <div className="text-xs text-gray-600">Time</div>
+          </div>
+
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">{questions.length}</div>
+            <div className="text-xs text-gray-600">Questions</div>
+          </div>
+
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">
+              {new Date(attempt.completed_at).toLocaleDateString()}
+            </div>
+            <div className="text-xs text-gray-600">Completed</div>
           </div>
         </div>
 
-        <div className="text-center">
-          <Button onClick={onClose}>Back to Quizzes</Button>
+        <div className="flex gap-3 justify-center">
+          <Button onClick={onClose} variant="outline">Back to Quizzes</Button>
+          {onToggleLeaderboard && (
+            <Button onClick={onToggleLeaderboard} variant="default">
+              {showLeaderboard ? 'Hide Leaderboard' : 'View Leaderboard'}
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Mini Leaderboard - Rendered between Quiz Completed and Answer Review */}
+      {showLeaderboard && leaderboardContent}
 
       <div className="bg-white p-8 rounded-3xl shadow-lg">
         <div className="text-center mb-8">
@@ -232,7 +264,34 @@ export const QuizResults = ({ attempt, onClose }: QuizResultsProps) => {
             Detailed answers are not available for this quiz.
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="flex gap-6">
+            {/* Question Navigation Sidebar */}
+            <div className="hidden lg:block sticky top-4 self-start">
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Questions</h4>
+                <div className="grid grid-cols-5 gap-2">
+                  {questionNavigation.map((nav) => (
+                    <button
+                      key={nav.id}
+                      onClick={() => scrollToQuestion(nav.id)}
+                      className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all hover:scale-110 ${
+                        nav.isCorrect
+                          ? 'bg-green-500 text-white hover:bg-green-600'
+                          : nav.isAnswered
+                          ? 'bg-red-500 text-white hover:bg-red-600'
+                          : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
+                      }`}
+                      title={nav.status}
+                    >
+                      {nav.number}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Questions List */}
+            <div className="flex-1 space-y-6">
             {questions.map((question, index) => {
               const studentValue = (answers as Record<string, unknown>)[question.id];
               const status = buildStatus(question, studentValue);
@@ -242,6 +301,7 @@ export const QuizResults = ({ attempt, onClose }: QuizResultsProps) => {
               return (
                 <div
                   key={question.id}
+                  id={`question-${question.id}`}
                   className={`rounded-2xl border ${status.containerClass} p-6 transition-all duration-200`}
                 >
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -306,6 +366,7 @@ export const QuizResults = ({ attempt, onClose }: QuizResultsProps) => {
                 </div>
               );
             })}
+            </div>
           </div>
         )}
       </div>

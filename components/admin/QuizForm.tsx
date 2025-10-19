@@ -213,7 +213,11 @@ export const QuizForm = ({ onSuccess, onCancel, quizToEdit }: QuizFormProps) => 
             className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             rows={4}
             placeholder="Describe what this quiz covers..."
+            maxLength={1000}
           />
+          <p className="text-xs text-muted-foreground">
+            {description.length}/1000 characters
+          </p>
         </div>
         
         <div>

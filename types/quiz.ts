@@ -20,6 +20,8 @@ export interface Quiz {
   duration_minutes: number;
   total_points: number;
   is_active: boolean;
+  visibility?: 'public' | 'private'; // public: anyone can take, private: only creator
+  max_attempts?: number | null; // null/0 = unlimited, positive number = limited attempts
   activation_cycle?: number;
   created_by: string;
   created_at: string;
@@ -45,6 +47,6 @@ export interface QuizAttempt {
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'student';
+  role: 'challenger';
   created_at: string;
 }

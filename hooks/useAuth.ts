@@ -35,11 +35,11 @@ export const useAuth = () => {
     }
 
     const client = supabase;
-    const metadataRole = user.user_metadata?.role as 'admin' | 'student' | undefined;
-    const normalizedRole = metadataRole === 'admin' ? 'admin' : 'student';
+    const metadataRole = user.user_metadata?.role as 'challenger' | undefined;
+    const normalizedRole = 'challenger';
 
     const syncUserRole = async () => {
-      const { error } = await client
+      const { error} = await client
         .from('user_roles')
         .upsert(
           {
@@ -57,13 +57,11 @@ export const useAuth = () => {
     void syncUserRole();
   }, [user]);
 
-  const isAdmin = user?.user_metadata?.role === 'admin';
-  const isStudent = user?.user_metadata?.role === 'student' || !user?.user_metadata?.role;
+  const isChallenger = user?.user_metadata?.role === 'challenger' || !!user;
 
   return {
     user,
     loading,
-    isAdmin,
-    isStudent,
+    isChallenger,
   };
 };

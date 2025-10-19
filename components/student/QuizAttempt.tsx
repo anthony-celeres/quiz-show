@@ -108,27 +108,30 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
 
       const { data: latestQuiz, error: latestQuizError } = await supabase
         .from('quizzes')
-        .select('activation_cycle')
+        .select('activation_cycle, max_attempts')
         .eq('id', quiz.id)
         .maybeSingle();
 
       if (latestQuizError) throw latestQuizError;
       const currentCycle = latestQuiz?.activation_cycle ?? quiz.activation_cycle ?? 0;
+      const maxAttempts = latestQuiz?.max_attempts ?? null;
 
-      const { data: existingAttempt, error: existingAttemptError } = await supabase
-        .from('quiz_attempts')
-        .select('id')
-        .eq('quiz_id', quiz.id)
-        .eq('user_id', user.user.id)
-        .eq('activation_cycle', currentCycle)
-        .maybeSingle();
+      // Check if user has reached max attempts limit
+      if (maxAttempts !== null && maxAttempts > 0) {
+        const { count, error: countError } = await supabase
+          .from('quiz_attempts')
+          .select('*', { count: 'exact', head: true })
+          .eq('quiz_id', quiz.id)
+          .eq('user_id', user.user.id)
+          .eq('activation_cycle', currentCycle);
 
-      if (existingAttemptError) throw existingAttemptError;
+        if (countError) throw countError;
 
-      if (existingAttempt) {
-        alert('You have already attempted this quiz for the current session. Ask your instructor to reactivate the quiz for another try.');
-        onComplete();
-        return;
+        if (count !== null && count >= maxAttempts) {
+          alert(`You have reached the maximum number of attempts (${maxAttempts}) for this quiz.`);
+          onComplete();
+          return;
+        }
       }
 
       const score = calculateScore();

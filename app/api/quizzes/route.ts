@@ -3,7 +3,14 @@ import { createSupabaseRouteClient } from '@/lib/supabase';
 
 export async function GET() {
   try {
-  const supabase = await createSupabaseRouteClient();
+    const supabase = await createSupabaseRouteClient();
+    
+    // Get current user to apply visibility filtering
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // RLS policies will automatically filter based on visibility
+    // Public quizzes: visible to all
+    // Private quizzes: only visible to creator
     const { data, error } = await supabase
       .from('quizzes')
       .select(
@@ -35,12 +42,21 @@ export async function POST(request: Request) {
       duration_minutes,
       total_points,
       is_active = true,
+      visibility = 'public',
       activation_cycle = 0,
     } = body ?? {};
 
     if (!title || !duration_minutes) {
       return NextResponse.json(
         { error: 'Title and duration are required.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate visibility value
+    if (visibility !== 'public' && visibility !== 'private') {
+      return NextResponse.json(
+        { error: 'Visibility must be either "public" or "private".' },
         { status: 400 }
       );
     }
@@ -58,9 +74,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
-    const role = user.user_metadata?.role;
-    if (role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
+    // Any authenticated challenger may create a quiz; store the creator id
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
     const { data, error } = await supabase
@@ -71,6 +87,7 @@ export async function POST(request: Request) {
         duration_minutes,
         total_points: total_points ?? 0,
         is_active,
+        visibility,
         activation_cycle,
         created_by: user.id,
       })

@@ -71,6 +71,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'quiz_id is required.' }, { status: 400 });
     }
 
+    // Check max attempts limit
+    const { data: quizData, error: quizError } = await supabase
+      .from('quizzes')
+      .select('max_attempts, activation_cycle')
+      .eq('id', quiz_id)
+      .single();
+
+    if (quizError) {
+      throw quizError;
+    }
+
+    if (quizData?.max_attempts && quizData.max_attempts > 0) {
+      // Count existing attempts for this quiz and user
+      const { count, error: countError } = await supabase
+        .from('quiz_attempts')
+        .select('*', { count: 'exact', head: true })
+        .eq('quiz_id', quiz_id)
+        .eq('user_id', user.id)
+        .eq('activation_cycle', quizData.activation_cycle ?? 0);
+
+      if (countError) {
+        throw countError;
+      }
+
+      if (count !== null && count >= quizData.max_attempts) {
+        return NextResponse.json(
+          { error: `You have reached the maximum number of attempts (${quizData.max_attempts}) for this quiz.` },
+          { status: 403 }
+        );
+      }
+    }
+
     const { data, error } = await supabase
       .from('quiz_attempts')
       .insert({

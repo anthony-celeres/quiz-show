@@ -14,7 +14,6 @@ interface AuthFormProps {
 const AuthForm = ({ onSuccess, mode = 'login' }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'student' | 'admin'>('student');
   const [isLogin, setIsLogin] = useState(mode !== 'register');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,14 +45,24 @@ const AuthForm = ({ onSuccess, mode = 'login' }: AuthFormProps) => {
 
         onSuccess();
       } else {
-        const { error: signUpError } = await signUp(email, password, role);
+        const { data, error: signUpError } = await signUp(email, password, 'challenger');
         if (signUpError) {
           setError(signUpError.message);
           return;
         }
 
-        setInfo('Account created. Check your inbox to confirm the sign-up.');
-        setIsLogin(true);
+        // Check if user was created and can immediately log in (email confirmation disabled)
+        if (data?.session) {
+          setInfo('Account created successfully! Redirecting...');
+          setTimeout(() => onSuccess(), 1000);
+        } else if (data?.user && !data?.session) {
+          // Email confirmation required
+          setInfo('Account created! Please check your email to confirm your account before signing in.');
+          setIsLogin(true);
+        } else {
+          setInfo('Account created. You can now sign in.');
+          setIsLogin(true);
+        }
       }
     } finally {
       setLoading(false);
@@ -117,36 +126,6 @@ const AuthForm = ({ onSuccess, mode = 'login' }: AuthFormProps) => {
                 required
               />
             </div>
-
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Account type</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { value: 'student' as const, title: 'Student', subtitle: 'Take quizzes' },
-                    { value: 'admin' as const, title: 'Admin', subtitle: 'Create quizzes' },
-                  ].map((option) => {
-                    const isSelected = role === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setRole(option.value)}
-                        className={cn(
-                          'rounded-lg border px-4 py-3 text-left transition-colors',
-                          isSelected
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-border hover:bg-muted/70'
-                        )}
-                      >
-                        <p className="text-sm font-medium">{option.title}</p>
-                        <p className="text-xs text-muted-foreground">{option.subtitle}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {error && (
               <div className="rounded-md border border-destructive/60 bg-destructive/10 px-4 py-3 text-sm text-destructive">

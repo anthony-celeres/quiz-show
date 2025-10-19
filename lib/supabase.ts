@@ -25,7 +25,7 @@ export const createSupabaseRouteClient = async () => {
   });
 };
 
-export const signUp = async (email: string, password: string, role: 'admin' | 'student' = 'student') => {
+export const signUp = async (email: string, password: string, role: 'challenger' = 'challenger') => {
   if (!supabase) {
     return { data: null, error: { message: 'Supabase not configured. Please set up your environment variables.' } };
   }

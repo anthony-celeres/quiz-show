@@ -46,7 +46,14 @@ export async function PUT(request: Request, context: { params: Promise<{ quizId:
       throw userError;
     }
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    // Ensure the authenticated user is the creator of the quiz
+    const ownerCheck = await supabase.from('quizzes').select('created_by').eq('id', quizId).maybeSingle();
+    if (ownerCheck.error) throw ownerCheck.error;
+    if (!ownerCheck.data || ownerCheck.data.created_by !== user.id) {
       return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
     }
 
@@ -82,7 +89,14 @@ export async function DELETE(_request: Request, context: { params: Promise<{ qui
       throw userError;
     }
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    // Ensure the authenticated user is the creator of the quiz
+    const ownerCheck = await supabase.from('quizzes').select('created_by').eq('id', quizId).maybeSingle();
+    if (ownerCheck.error) throw ownerCheck.error;
+    if (!ownerCheck.data || ownerCheck.data.created_by !== user.id) {
       return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
     }
 

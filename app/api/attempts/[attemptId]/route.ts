@@ -37,8 +37,16 @@ export async function GET(_request: Request, context: { params: Promise<{ attemp
       return NextResponse.json({ error: 'Attempt not found.' }, { status: 404 });
     }
 
-    const role = user.user_metadata?.role;
-    if (role !== 'admin' && data.user_id !== user.id) {
+    // Allow the attempt owner or the creator of the quiz to view the attempt
+    const quizOwnerCheck = await supabase
+      .from('quizzes')
+      .select('created_by')
+      .eq('id', data.quiz_id)
+      .maybeSingle();
+    if (quizOwnerCheck.error) throw quizOwnerCheck.error;
+
+    const quizOwnerId = quizOwnerCheck.data?.created_by;
+    if (data.user_id !== user.id && quizOwnerId !== user.id) {
       return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
     }
 
@@ -63,9 +71,20 @@ export async function DELETE(_request: Request, context: { params: Promise<{ att
       throw userError;
     }
 
-    if (!user || user.user_metadata?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
+
+    // Allow the attempt owner or the quiz creator to delete
+    const attempt = await supabase.from('quiz_attempts').select('user_id, quiz_id').eq('id', attemptId).maybeSingle();
+    if (attempt.error) throw attempt.error;
+    if (!attempt.data) return NextResponse.json({ error: 'Attempt not found.' }, { status: 404 });
+
+    const quiz = await supabase.from('quizzes').select('created_by').eq('id', attempt.data.quiz_id).maybeSingle();
+    if (quiz.error) throw quiz.error;
+
+    const canDelete = attempt.data.user_id === user.id || quiz.data?.created_by === user.id;
+    if (!canDelete) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
 
     const { error } = await supabase.from('quiz_attempts').delete().eq('id', attemptId);
 
