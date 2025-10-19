@@ -252,12 +252,8 @@ export const ChallengerQuizForm = ({ onSuccess, onCancel, quizToEdit }: Challeng
 
             {/* Questions */}
             <div className="border-t pt-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4">
                 <h3 className="text-lg font-semibold">Questions</h3>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddQuestion}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Question
-                </Button>
               </div>
 
               <div className="space-y-4">
@@ -441,6 +437,14 @@ export const ChallengerQuizForm = ({ onSuccess, onCancel, quizToEdit }: Challeng
                     </div>
                   </Card>
                 ))}
+              </div>
+
+              {/* Add Question Button at Bottom */}
+              <div className="mt-4">
+                <Button type="button" variant="outline" size="sm" onClick={handleAddQuestion} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
               </div>
             </div>
 
