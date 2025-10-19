@@ -188,8 +188,8 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
 
   return (
     <div className="max-w-4xl mx-auto modern-card p-4 sm:p-6 md:p-8 fade-in">
-      {/* Sticky Timer Bar */}
-      <div className="sticky top-0 z-50 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 mb-6 sm:mb-8 px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      {/* Sticky Timer Bar - positioned below header + nav */}
+      <div className="sticky top-[142px] z-30 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 mb-6 sm:mb-8 px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="flex flex-col gap-3 sm:gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1 sm:mb-2">{quiz.title}</h2>
