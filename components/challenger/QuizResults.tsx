@@ -205,8 +205,8 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
               )}
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold">Quiz Completed!</h2>
-              <p className="text-xs sm:text-sm text-gray-600 break-words">{attempt.quiz?.title}</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Quiz Completed!</h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">{attempt.quiz?.title}</p>
             </div>
           </div>
           
@@ -266,17 +266,17 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
             Detailed answers are not available for this quiz.
           </div>
         ) : (
-          <div className="flex gap-6">
-            {/* Question Navigation Sidebar */}
-            <div className="hidden lg:block sticky top-4 self-start">
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Questions</h4>
-                <div className="grid grid-cols-5 gap-2">
+          <div className="flex gap-4 lg:gap-6">
+            {/* Question Navigation Sidebar - Now visible on all screens, sticky */}
+            <div className="sticky top-4 self-start z-40">
+              <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl lg:rounded-2xl p-3 lg:p-4 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <h4 className="text-xs lg:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 lg:mb-3">Questions</h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1.5 lg:gap-2">
                   {questionNavigation.map((nav) => (
                     <button
                       key={nav.id}
                       onClick={() => scrollToQuestion(nav.id)}
-                      className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all hover:scale-110 ${
+                      className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg font-semibold text-xs lg:text-sm transition-all hover:scale-110 ${
                         nav.isCorrect
                           ? 'bg-green-500 text-white hover:bg-green-600'
                           : nav.isAnswered

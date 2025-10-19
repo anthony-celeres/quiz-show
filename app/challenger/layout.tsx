@@ -53,7 +53,7 @@ export default function ChallengerLayout({ children }: { children: ReactNode }) 
         </div>
       </header>
 
-      <nav className="sticky top-[89px] z-40 border-b border-border bg-primary/5 dark:bg-primary/10">
+      <nav className="sticky top-[89px] z-40 border-b border-border bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto flex max-w-6xl gap-3 px-6 py-3 items-center justify-between">
           <div className="flex gap-3 overflow-x-auto">
             {challengerNav.map((item) => {
