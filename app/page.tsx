@@ -49,11 +49,11 @@ export default function LandingPage() {
             <a href="#how-it-works" className="hover:text-primary transition-colors">How it works</a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'hidden sm:inline-flex')}>
-              Sign in
-            </Link>
-            <Link href="/register" className={cn(buttonVariants({ size: 'sm' }), 'text-xs sm:text-sm whitespace-nowrap')}>
+            <Link href="/register" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'hidden sm:inline-flex')}>
               Create account
+            </Link>
+            <Link href="/login" className={cn(buttonVariants({ size: 'sm' }), 'text-xs sm:text-sm whitespace-nowrap')}>
+              Log-in
             </Link>
           </div>
         </div>
@@ -76,13 +76,13 @@ export default function LandingPage() {
                 href="/register"
                 className={cn(buttonVariants({ size: 'lg' }), 'w-full sm:w-auto min-w-[160px]')}
               >
-                Get started
+                Create account
               </Link>
               <Link
                 href="/login"
                 className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'w-full sm:w-auto min-w-[160px]')}
               >
-                I already have an account
+                Log-in
               </Link>
             </div>
           </div>
