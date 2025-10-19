@@ -12,13 +12,30 @@ const isPublicPath = (pathname: string) => {
 };
 
 export async function middleware(req: NextRequest) {
+  // Check if environment variables are set
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables');
+    // Allow request to continue without auth in development
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.next();
+    }
+    // In production, return error
+    return new NextResponse(
+      JSON.stringify({ error: 'Server configuration error. Please contact support.' }),
+      { status: 500, headers: { 'content-type': 'application/json' } }
+    );
+  }
+
   let supabaseResponse = NextResponse.next({
     request: req,
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
