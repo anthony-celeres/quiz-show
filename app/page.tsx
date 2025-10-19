@@ -16,7 +16,7 @@ export default function LandingPage() {
     if (loading) return;
     if (!user) return;
 
-    router.replace('/challenger');
+    router.replace('/challenger/quizzes');
   }, [user, loading, router]);
 
   if (loading) {

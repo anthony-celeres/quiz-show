@@ -1,10 +1,23 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function ChallengerDashboardPage() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Redirect to quizzes page since dashboard is no longer used
+    router.replace('/challenger/quizzes');
+  }, [router]);
+  
+  // Show loading while redirecting
   return (
     <div className="modern-card p-10">
-      <h1 className="text-3xl font-bold text-foreground mb-4">Challenger Dashboard</h1>
-      <p className="text-muted-foreground">
-        Track your quiz progress, review history, and explore new challenges using the links above.
-      </p>
+      <div className="flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <span className="ml-3 text-muted-foreground">Redirecting to Quizzes...</span>
+      </div>
     </div>
   );
 }

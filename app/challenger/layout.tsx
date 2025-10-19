@@ -2,23 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode } from 'react';
-import { GraduationCap, LogOut } from 'lucide-react';
+import { ReactNode, useState } from 'react';
+import { GraduationCap, LogOut, Menu, X, Home, FileText, Trophy, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/supabase';
 
 const challengerNav = [
-  { href: '/challenger/quizzes', label: 'Quizzes' },
-  { href: '/challenger/history', label: 'History' },
-  { href: '/challenger/leaderboard', label: 'Leaderboard' },
+  { href: '/challenger/quizzes', label: 'Quizzes', icon: Home },
+  { href: '/challenger/history', label: 'History', icon: FileText },
+  { href: '/challenger/leaderboard', label: 'Leaderboard', icon: Trophy },
 ];
 
 export default function ChallengerLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -26,71 +27,148 @@ export default function ChallengerLayout({ children }: { children: ReactNode }) 
     router.refresh();
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b border-border bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <GraduationCap className="h-6 w-6" />
+      {/* Mobile Header - Visible only on mobile */}
+      <header className="md:hidden sticky top-0 z-50 border-b border-border bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <GraduationCap className="h-5 w-5" />
             </div>
             <div>
-              <Link href="/challenger" className="text-xl font-semibold text-primary hover:text-primary/80 transition-colors">
-                QuizMaster Challenger
+              <Link href="/challenger/quizzes" className="text-base font-semibold text-primary hover:text-primary/80 transition-colors">
+                QuizMaster
               </Link>
-              <p className="text-sm text-muted-foreground">Practice. Compete. Improve.</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex flex-col text-right">
-              <span className="text-sm font-medium">{user?.email ?? 'Challenger'}</span>
-              <span className="text-xs text-muted-foreground">Challenger</span>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Desktop Minimal Header - Compact with burger menu */}
+      <header className="hidden md:block sticky top-0 z-50 border-b border-border bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <GraduationCap className="h-5 w-5" />
             </div>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" /> Sign Out
+            <Link href="/challenger/quizzes" className="text-lg font-semibold text-primary hover:text-primary/80 transition-colors">
+              QuizMaster
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <span className="hidden lg:inline text-sm font-medium text-gray-700 dark:text-gray-300">{user?.email ?? 'Challenger'}</span>
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs px-3 py-1.5">
+              <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sign Out
             </Button>
           </div>
         </div>
       </header>
 
-      <nav className="sticky top-[89px] z-40 border-b border-border bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-6xl gap-3 px-6 py-3 items-center justify-between">
-          <div className="flex gap-3 overflow-x-auto">
+      {/* Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[55] backdrop-blur-sm"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Menu Sidebar - Mobile: slides from right, Desktop: slides from left */}
+      <div className={`fixed top-0 h-full w-72 bg-white dark:bg-gray-900 shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:-translate-x-full'}
+        right-0 md:right-auto md:left-0
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Menu Header */}
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-primary">QuizMaster</div>
+                  <div className="text-xs text-muted-foreground">Challenger</div>
+                </div>
+              </div>
+              <button
+                onClick={closeMobileMenu}
+                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground truncate">{user?.email ?? 'Challenger'}</div>
+          </div>
+
+          {/* Menu Items */}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {challengerNav.map((item) => {
               const isActive = pathname?.startsWith(item.href);
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-primary text-white shadow'
-                      : 'text-primary hover:bg-primary/10'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  {item.label}
+                  <Icon size={20} />
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
-          </div>
-          {/* Desktop: Create Quiz in nav */}
-          <Link
-            href="/challenger/quizzes/new"
-            className="hidden md:block rounded-full px-4 py-2 text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap"
-          >
-            + Create Quiz
-          </Link>
-        </div>
-      </nav>
+            
+            {/* Create Quiz Button */}
+            <Link
+              href="/challenger/quizzes/new"
+              onClick={closeMobileMenu}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-md mt-4"
+            >
+              <Plus size={20} />
+              <span className="font-medium">Create Quiz</span>
+            </Link>
+          </nav>
 
-      {/* Mobile: Create Quiz below nav, above content */}
-      <div className="md:hidden mx-auto max-w-6xl px-6 pt-4 pb-2">
-        <Link href="/challenger/quizzes/new" className="block">
-          <Button className="w-full">+ Create Quiz</Button>
-        </Link>
+          {/* Sign Out Button */}
+          <div className="p-4 border-t border-border">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                handleSignOut();
+                closeMobileMenu();
+              }}
+            >
+              <LogOut className="mr-2 h-4 w-4" /> Sign Out
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 md:px-6 py-4 md:py-10">{children}</main>
     </div>
   );
 }

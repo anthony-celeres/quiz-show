@@ -59,14 +59,14 @@ export default function ChallengerQuizAttemptPage() {
 
   const handleComplete = useCallback(() => {
     if (!quizId) {
-      router.push('/challenger');
+      router.push('/challenger/quizzes');
       return;
     }
     router.push(`/challenger/quiz/${quizId}/results`);
   }, [quizId, router]);
 
   const handleCancel = useCallback(() => {
-    router.push('/challenger');
+    router.push('/challenger/quizzes');
   }, [router]);
 
   if (loading) {

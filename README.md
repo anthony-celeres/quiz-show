@@ -16,6 +16,7 @@ A beautiful, full-featured quiz application built with Next.js, TypeScript, and 
 ### 👨‍💼 **Admin Features**
 - **Quiz Creation**: Create comprehensive quizzes with multiple choice questions
 - **Quiz Management**: Edit, activate/deactivate, and delete quizzes
+- **Cascade Delete**: Deleting a quiz automatically removes all questions, attempts, and points
 - **Student Analytics**: View detailed attempt statistics and performance metrics
 - **Real-time Monitoring**: See quiz attempts as they happen
 - **User Management**: Track student progress and engagement

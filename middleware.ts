@@ -80,7 +80,7 @@ export async function middleware(req: NextRequest) {
 
   if (session && (pathname === '/' || pathname === '/login' || pathname === '/register')) {
     const redirectToParam = searchParams.get('redirectTo');
-    const fallbackPath = '/challenger';
+    const fallbackPath = '/challenger/quizzes';
     const destination = redirectToParam && redirectToParam.startsWith('/')
       ? new URL(redirectToParam, req.nextUrl.origin)
       : new URL(fallbackPath, req.nextUrl.origin);

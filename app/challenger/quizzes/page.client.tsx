@@ -38,7 +38,15 @@ export default function ChallengerQuizzesPage() {
   }, []);
 
   const handleDeleteQuiz = async (quizId: string) => {
-    if (!confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
+    const confirmMessage = 
+      '⚠️ WARNING: This will permanently delete:\n\n' +
+      '• All questions in this quiz\n' +
+      '• All user attempts and scores\n' +
+      '• All history and points earned from this quiz\n\n' +
+      'This action CANNOT be undone!\n\n' +
+      'Are you sure you want to continue?';
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
 

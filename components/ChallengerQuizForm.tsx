@@ -73,8 +73,46 @@ export const ChallengerQuizForm = ({ onSuccess, onCancel, quizToEdit }: Challeng
           throw new Error(quizResult.error || 'Failed to update quiz');
         }
 
-        // For now, we'll just redirect. In a full implementation, you'd want to
-        // handle updating/deleting/creating questions as well.
+        // Handle questions update: delete old questions and create new ones
+        // This is simpler than trying to diff and update individual questions
+        
+        // First, fetch existing question IDs
+        const existingQuestionsResponse = await fetch(`/api/quizzes/${quizToEdit.id}`);
+        const existingQuizData = await existingQuestionsResponse.json();
+        const existingQuestions = existingQuizData.data?.questions || [];
+
+        // Delete all existing questions
+        for (const existingQuestion of existingQuestions) {
+          await fetch(`/api/questions/${existingQuestion.id}`, {
+            method: 'DELETE',
+          });
+        }
+
+        // Create all new questions
+        for (const question of questions) {
+          if (!question.question_text) continue;
+
+          const questionPayload = {
+            quiz_id: quizToEdit.id,
+            question_text: question.question_text,
+            correct_answer: question.correct_answer,
+            points: question.points || 1,
+            type: question.type || 'identification',
+            options: question.options || [],
+          };
+
+          const questionResponse = await fetch('/api/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(questionPayload),
+          });
+
+          if (!questionResponse.ok) {
+            const questionError = await questionResponse.json();
+            throw new Error(questionError.error || 'Failed to create question');
+          }
+        }
+
         onSuccess(quizResult.data);
         return;
       }
@@ -307,7 +345,7 @@ export const ChallengerQuizForm = ({ onSuccess, onCancel, quizToEdit }: Challeng
                                 ...updated[index],
                                 type: newType,
                                 correct_answer: 0,
-                                options: ['Option 1', 'Option 2', 'Option 3', 'Option 4']
+                                options: ['', '', '', '']
                               };
                             } else {
                               updated[index] = {
