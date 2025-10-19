@@ -13,6 +13,7 @@ const challengerNav = [
   { href: '/challenger/quizzes', label: 'Quizzes' },
   { href: '/challenger/history', label: 'History' },
   { href: '/challenger/leaderboard', label: 'Leaderboard' },
+  { href: '/challenger/profile', label: 'Profile' },
 ];
 
 export default function ChallengerLayout({ children }: { children: ReactNode }) {

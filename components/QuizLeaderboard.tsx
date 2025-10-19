@@ -7,6 +7,8 @@ import { Trophy, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 interface QuizLeaderboardEntry {
   id: string;
   user_email: string;
+  username?: string;
+  display_name?: string;
   percentage: number;
   score: number;
   total_points: number;
@@ -29,9 +31,10 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
       if (!supabase) return;
       
       try {
+        // Use the view that includes profile information
         const { data, error } = await supabase
-          .from('quiz_attempts')
-          .select('id, user_email, percentage, score, total_points, time_taken, completed_at')
+          .from('quiz_attempts_with_profiles')
+          .select('id, user_email, username, display_name, percentage, score, total_points, time_taken, completed_at')
           .eq('quiz_id', quizId)
           .order('percentage', { ascending: false })
           .order('time_taken', { ascending: true })
@@ -143,8 +146,13 @@ export const QuizLeaderboard = ({ quizId, isVisible = true, onToggle }: QuizLead
               {/* User */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {attempt.user_email}
+                  {attempt.display_name || attempt.username || attempt.user_email}
                 </p>
+                {attempt.username && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    @{attempt.username}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {new Date(attempt.completed_at).toLocaleDateString()}
                 </p>

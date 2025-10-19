@@ -5,6 +5,8 @@ import { Trophy } from 'lucide-react';
 interface LeaderboardEntry {
   user_id: string;
   user_email: string;
+  username?: string;
+  display_name?: string;
   total_attempts: number;
   avg_percentage: number;
   total_score: number;
@@ -24,16 +26,18 @@ export const Leaderboard = () => {
     if (!supabase) return;
     
     try {
-      // Get all attempts grouped by user
+      // Get all attempts with profile information using the view
       const { data, error } = await supabase
-        .from('quiz_attempts')
-        .select('user_id, user_email, percentage, score, total_points');
+        .from('quiz_attempts_with_profiles')
+        .select('user_id, user_email, username, display_name, percentage, score, total_points');
 
       if (error) throw error;
 
       // Calculate average performance per user
       const userStats = new Map<string, {
         user_email: string;
+        username?: string;
+        display_name?: string;
         percentages: number[];
         scores: number[];
         totalPoints: number[];
@@ -44,6 +48,8 @@ export const Leaderboard = () => {
         if (!userStats.has(userId)) {
           userStats.set(userId, {
             user_email: attempt.user_email || 'Unknown User',
+            username: attempt.username,
+            display_name: attempt.display_name,
             percentages: [],
             scores: [],
             totalPoints: []
@@ -65,6 +71,8 @@ export const Leaderboard = () => {
         return {
           user_id: userId,
           user_email: stats.user_email,
+          username: stats.username,
+          display_name: stats.display_name,
           total_attempts: stats.percentages.length,
           avg_percentage: Math.round(avgPercentage),
           total_score: totalScore,
@@ -141,8 +149,13 @@ export const Leaderboard = () => {
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground truncate">
-                      {leader.user_email}
+                      {leader.display_name || leader.username || leader.user_email}
                     </h3>
+                    {leader.username && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        @{leader.username}
+                      </p>
+                    )}
                     <p className="text-sm text-muted-foreground">
                       {leader.total_attempts} quiz{leader.total_attempts !== 1 ? 'zes' : ''} taken
                     </p>

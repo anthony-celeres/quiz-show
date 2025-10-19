@@ -32,11 +32,11 @@ Migrated to `/app/challenger/`:
 
 **Reason**: Replaced by `ChallengerQuizForm.tsx` and integrated into challenger routes.
 
-### Student Components (2 files) ✅ KEPT
-- `components/student/QuizAttempt.tsx` - Used by `/challenger/quiz/[quizId]`
-- `components/student/QuizResults.tsx` - Used by `/challenger/quiz/[quizId]/results`
+### Challenger Components (2 files) ✅ KEPT
+- `components/challenger/QuizAttempt.tsx` - Used by `/challenger/quiz/[quizId]`
+- `components/challenger/QuizResults.tsx` - Used by `/challenger/quiz/[quizId]/results`
 
-**Status**: These are still actively used by challenger routes and were retained.
+**Status**: These are actively used by challenger routes and were renamed from the `student` folder to `challenger` for consistency.
 
 ## New Files Created
 

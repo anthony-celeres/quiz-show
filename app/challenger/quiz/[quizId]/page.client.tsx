@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { QuizAttempt } from '@/components/student/QuizAttempt';
+import { QuizAttempt } from '@/components/challenger/QuizAttempt';
 import { supabase } from '@/lib/supabase';
 import { Quiz } from '@/types/quiz';
 

@@ -7,13 +7,13 @@ import { BookOpen, Clock, Play, Trophy, Globe, Lock, Edit, Trash2 } from 'lucide
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
-import { Quiz, QuizAttempt as QuizAttemptType } from '@/types/quiz';
+import { Quiz, QuizAttempt as QuizAttemptType, QuizWithCreator } from '@/types/quiz';
 
 export default function ChallengerQuizzesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [quizzes, setQuizzes] = useState<QuizWithCreator[]>([]);
   const [attempts, setAttempts] = useState<QuizAttemptType[]>([]);
   const [deletingQuizId, setDeletingQuizId] = useState<string | null>(null);
 
@@ -23,8 +23,9 @@ export default function ChallengerQuizzesPage() {
     if (!supabase) return;
 
     try {
+      // Use the view that includes creator information
       const { data, error } = await supabase
-        .from('quizzes')
+        .from('quizzes_with_creators')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -91,12 +92,12 @@ export default function ChallengerQuizzesPage() {
       .finally(() => setLoading(false));
   }, [fetchAttempts, fetchQuizzes]);
 
-  if (!supabase) {
-    return <div className="modern-card p-8">Supabase is not configured.</div>;
-  }
-
   if (loading) {
     return <div className="modern-card p-8">Loading available quizzes...</div>;
+  }
+
+  if (!supabase) {
+    return <div className="modern-card p-8">Supabase is not configured.</div>;
   }
 
   if (!canQuery) {
@@ -158,8 +159,14 @@ export default function ChallengerQuizzesPage() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {quiz.creator_username && !isOwner && (
+                          <p className="text-sm text-muted-foreground">
+                            by <span className="font-medium">{quiz.creator_display_name || quiz.creator_username}</span>
+                          </p>
+                        )}
                         <p className="text-sm text-muted-foreground">
+                          {quiz.creator_username && !isOwner && '• '}
                           Updated {new Date(quiz.created_at).toLocaleDateString()}
                         </p>
                         {isPrivate ? (

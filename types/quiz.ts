@@ -50,3 +50,21 @@ export interface User {
   role: 'challenger';
   created_at: string;
 }
+
+export interface Profile {
+  id: string;
+  username: string;
+  display_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuizWithCreator extends Quiz {
+  creator_username?: string;
+  creator_display_name?: string;
+}
+
+export interface QuizAttemptWithProfile extends QuizAttempt {
+  username?: string;
+  display_name?: string;
+}
