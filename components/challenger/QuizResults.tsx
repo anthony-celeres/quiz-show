@@ -205,8 +205,8 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
               )}
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold">Quiz Completed!</h2>
-              <p className="text-xs sm:text-sm text-gray-600 break-words">{attempt.quiz?.title}</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Quiz Completed!</h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">{attempt.quiz?.title}</p>
             </div>
           </div>
           
@@ -266,34 +266,32 @@ export const QuizResults = ({ attempt, onClose, onToggleLeaderboard, showLeaderb
             Detailed answers are not available for this quiz.
           </div>
         ) : (
-          <div className="flex gap-6">
-            {/* Question Navigation Sidebar */}
-            <div className="hidden lg:block sticky top-4 self-start">
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Questions</h4>
-                <div className="grid grid-cols-5 gap-2">
-                  {questionNavigation.map((nav) => (
-                    <button
-                      key={nav.id}
-                      onClick={() => scrollToQuestion(nav.id)}
-                      className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all hover:scale-110 ${
-                        nav.isCorrect
-                          ? 'bg-green-500 text-white hover:bg-green-600'
-                          : nav.isAnswered
-                          ? 'bg-red-500 text-white hover:bg-red-600'
-                          : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
-                      }`}
-                      title={nav.status}
-                    >
-                      {nav.number}
-                    </button>
-                  ))}
-                </div>
+          <div>
+            {/* Question Navigation - ABOVE questions on all devices, sticky below header+nav */}
+            <div className="sticky top-[142px] z-30 mb-6 -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 py-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-y border-gray-200 dark:border-gray-700 shadow-sm">
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">Questions</h4>
+              <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5 sm:gap-2 max-h-[120px] overflow-y-auto">
+                {questionNavigation.map((nav) => (
+                  <button
+                    key={nav.id}
+                    onClick={() => scrollToQuestion(nav.id)}
+                    className={`w-10 h-10 rounded-lg font-semibold text-xs sm:text-sm transition-all hover:scale-110 ${
+                      nav.isCorrect
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : nav.isAnswered
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
+                    }`}
+                    title={nav.status}
+                  >
+                    {nav.number}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Questions List */}
-            <div className="flex-1 space-y-4 sm:space-y-6">
+            {/* Questions List - Full Width */}
+            <div className="space-y-4 sm:space-y-6">
             {questions.map((question, index) => {
               const studentValue = (answers as Record<string, unknown>)[question.id];
               const status = buildStatus(question, studentValue);

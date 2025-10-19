@@ -188,34 +188,37 @@ export const QuizAttempt = ({ quiz, onComplete, onCancel }: QuizAttemptProps) =>
 
   return (
     <div className="max-w-4xl mx-auto modern-card p-4 sm:p-6 md:p-8 fade-in">
-      <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1 sm:mb-2">{quiz.title}</h2>
-          <p className="text-sm sm:text-base text-gray-600">Test your knowledge and see how you perform!</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-          <div className={`flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl shadow-lg transition-all duration-200 ${
-            timeLeft < 300 
-              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse' 
-              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-          }`}>
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-            <span className="font-mono font-bold text-base sm:text-lg">{formatTime(timeLeft)}</span>
+      {/* Sticky Timer Bar - positioned below header + nav */}
+      <div className="sticky top-[142px] z-30 -mx-4 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8 mb-6 sm:mb-8 px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-1 sm:mb-2">{quiz.title}</h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Test your knowledge and see how you perform!</p>
           </div>
           
-          <div className="bg-gray-50 dark:bg-gray-800 px-3 sm:px-4 py-2 sm:py-3 rounded-xl flex-1 sm:flex-initial">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
-              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-                {Object.keys(answers).length} / {questions.length} answered
-              </span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
+            <div className={`flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl shadow-lg transition-all duration-200 ${
+              timeLeft < 300 
+                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse' 
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+            }`}>
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="font-mono font-bold text-base sm:text-lg">{formatTime(timeLeft)}</span>
             </div>
-            <div className="progress-bar mt-2">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }}
-              ></div>
+            
+            <div className="bg-gray-50 dark:bg-gray-800 px-3 sm:px-4 py-2 sm:py-3 rounded-xl flex-1 sm:flex-initial">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {Object.keys(answers).length} / {questions.length} answered
+                </span>
+              </div>
+              <div className="progress-bar mt-2">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
